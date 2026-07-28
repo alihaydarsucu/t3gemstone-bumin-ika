@@ -1,0 +1,6 @@
+gemstone_bringup:
+  ros__parameters:
+    enable_camera: true
+    enable_lidar: true
+    enable_motor: true
+    status_topic: /gemstone/system/status

@@ -1,0 +1,10 @@
+build/
+install/
+log/
+.colcon/
+*.pyc
+__pycache__/
+*.swp
+*.swo
+.venv/
+.DS_Store
