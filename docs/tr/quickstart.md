@@ -4,130 +4,96 @@ Bu sayfa, Gemstone bringup hattını gerçekten çalıştırmak için gereken ad
 
 ## Ne Çalışıyor?
 
-Şu anki launch akışı iki gerçek parçayı hedefler:
+Şu anki launch akışı (`gemstone_bringup/launch/bringup.launch.py`) şu parçaları
+kapsar, hepsi ayrı bir `enable_*` argümanıyla açılıp kapanabilir:
 
-1. `ICM-20948` IMU node'u
-2. A1M8 için Slamtec ROS 2 lidar launch'u
+1. `gemstone_imu` — ICM-20948 IMU node'u (`enable_imu`)
+2. `imu_filter_madgwick` — ham IMU'ya yönelim ekler (`enable_imu_filter`)
+3. `gemstone_motor_driver` — UART motor sürücü (`enable_motor_driver`)
+4. `gemstone_camera` — CSI kamera (`enable_camera`)
+5. `gemstone_image_proc` — görüntü işleme iskeleti (`enable_image_proc`)
+6. `gemstone_lidar_bringup` — A1M8 lidar + rf2o + engelden kaçınma
+   (`enable_lidar_stack`, kendi içinde `enable_slam_toolbox`/`enable_nav2`)
 
 ## Ön Koşullar
 
 ### Sistem
 
 - Linux üzerinde ROS 2 Humble kurulu olmalı
-- `/dev/spidev0.3` erişimi olmalı
-- `/dev/ttyUSB0` erişimi olmalı
+- `/dev/spidev0.3` erişimi olmalı (dahili IMU)
+- `/dev/ttyS0` erişimi olmalı (motor UART, UART-WKUP0)
+- `/dev/ttyUSB0` erişimi olmalı (RPLidar A1M8)
 
 ### Paketler
 
-- `python3-spidev`
-- `sllidar_ros2`
-- `sensor_msgs`
+Tam liste için [build.md](build.md); özetle: `ros-humble-v4l2-camera`,
+`ros-humble-cv-bridge`, `ros-humble-slam-toolbox`,
+`ros-humble-navigation2`/`nav2-bringup`, `ros-humble-imu-filter-madgwick`,
+`ros-humble-robot-state-publisher`, `ros-humble-joint-state-publisher`,
+`ros-humble-xacro`, `ros-humble-diagnostic-updater`, `python3-serial`,
+`python3-opencv`, ve kaynaktan clone edilecek `rf2o_laser_odometry` +
+`sllidar_ros2`.
 
 ## Tavsiye Edilen Kurulum
 
-Bu repo, host sistemde ROS 2 kurulumu varsa doğrudan çalışabilir.
-Kurulum yoksa kökteki `Dockerfile` ile izole test yapmak daha güvenlidir.
-
-### Seçenek 1: Host Üzerinde
-
-1. ROS 2 ortamını yükle:
+### Seçenek 1: Host Üzerinde (kartın kendisi)
 
 ```bash
 source /opt/ros/humble/setup.bash
-```
-
-2. Workspace kökünde build et:
-
-```bash
+cd src   # bu repo + rf2o_laser_odometry + sllidar_ros2 burada olmali
+rosdep install --from-paths . --ignore-src -r -y
+cd ..
 colcon build --symlink-install
-```
-
-3. Ortamı source et:
-
-```bash
 source install/setup.bash
-```
-
-4. Launch'u çalıştır:
-
-```bash
 ros2 launch gemstone_bringup bringup.launch.py
 ```
 
-### Seçenek 2: Docker ile
-
-1. İmaj oluştur:
+### Seçenek 2: Docker ile (donanımsız kod/derleme testi)
 
 ```bash
 docker build -t gemstone-bringup-humble .
-```
-
-2. Container başlat:
-
-```bash
-docker run -it --rm --device=/dev/spidev0.3 --device=/dev/ttyUSB0 -v "$PWD:/workspace" gemstone-bringup-humble
-```
-
-3. Container içinde ROS ortamını yükle:
-
-```bash
+docker run -it --rm --device=/dev/spidev0.3 --device=/dev/ttyS0 --device=/dev/ttyUSB0 \
+  -v "$PWD:/workspace" gemstone-bringup-humble
 source /opt/ros/humble/setup.bash
-```
-
-4. Build et:
-
-```bash
 colcon build --symlink-install
-```
-
-5. Çalıştır:
-
-```bash
 source install/setup.bash
 ros2 launch gemstone_bringup bringup.launch.py
 ```
 
-## Launch Ne Başlatır?
+## Kademeli Test (önerilir)
 
-`bringup.launch.py` şu iki şeyi başlatır:
-
-1. `gemstone_imu`
-   - ICM-20948 IMU sensörünü SPI üzerinden açar
-   - `/gemstone/imu/data` topic'ine `sensor_msgs/Imu` yayınlar
-
-2. `sllidar_ros2`
-   - A1M8 lidar için Slamtec ROS 2 launch'unu açar
-   - varsayılan olarak `/dev/ttyUSB0` ve `115200` baudrate kullanır
-
-## Launch Parametreleri
-
-İstersen varsayılanları override edebilirsin:
+Hepsini birden açmadan önce her katmanı tek tek doğrulayın — tam komutlar
+için [../../gemstone_ws/README.md](../../gemstone_ws/README.md) içindeki
+"Önerilen test sırası" bölümüne bakın. Özet:
 
 ```bash
+# 1) sadece IMU
 ros2 launch gemstone_bringup bringup.launch.py \
-  imu_spi_device:=/dev/spidev0.3 \
-  imu_frame_id:=icm20948_link \
-  imu_publish_rate_hz:=100.0 \
-  lidar_serial_port:=/dev/ttyUSB0 \
-  lidar_serial_baudrate:=115200
+  enable_motor_driver:=false enable_camera:=false enable_image_proc:=false enable_lidar_stack:=false
+
+# 2) IMU + motor (teker havada/blok uzerinde!)
+ros2 launch gemstone_bringup bringup.launch.py \
+  enable_camera:=false enable_image_proc:=false enable_lidar_stack:=false
+
+# 3) hepsi, haritalama modu
+ros2 launch gemstone_bringup bringup.launch.py enable_slam_toolbox:=true
 ```
 
 ## Beklenen Topic'ler
 
-- `/gemstone/imu/data`
-- `/scan`
+```bash
+ros2 topic list
+ros2 topic echo /imu/data_raw
+ros2 topic echo /scan
+ros2 topic echo /camera/image_raw
+```
+
+Tam topic tablosu için [../../gemstone_ws/README.md](../../gemstone_ws/README.md).
 
 ## Sorun Çıkarırsa
 
-- `python3-spidev` yoksa IMU node açılmaz
-- `sllidar_ros2` yoksa lidar launch açılmaz
-- cihaz izinleri yoksa `spidev` ve `ttyUSB0` erişimi başarısız olur
-- yanlış baudrate veya yanlış port, lidar scan başlatmayı engeller
-
-## Kontrol İçin Hızlı Komutlar
-
-```bash
-ros2 topic list
-ros2 topic echo /gemstone/imu/data
-ros2 topic echo /scan
-```
+- IMU açılmıyorsa `/dev/spidev0.3` izinlerini kontrol edin
+- motor sürücü açılmıyorsa `/dev/ttyS0` izinlerini kontrol edin (bkz.
+  [troubleshooting.md](troubleshooting.md))
+- lidar açılmıyorsa `sllidar_ros2` kurulu mu, `/dev/ttyUSB0` doğru mu kontrol edin
+- kamera açılmıyorsa CSI overlay + `gem-camera-setup` adımlarını tekrarlayın

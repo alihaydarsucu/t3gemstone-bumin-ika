@@ -2,7 +2,6 @@
 
 - /docs/tr/introduction.md
 - /docs/tr/architecture.md
-- /docs/tr/r5f.md
 - /docs/tr/drivers.md
 - /docs/tr/camera.md
 - /docs/tr/bringup.md

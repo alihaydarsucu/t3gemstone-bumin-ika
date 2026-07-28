@@ -1,0 +1,10 @@
+motor_driver_node:
+  ros__parameters:
+    serial_port: /dev/ttyS0        # UART-WKUP0, bkz. docs.t3gemstone.org/tr/boards/o1/peripherals/serial.md
+    baud_rate: 115200
+    # DIKKAT: gemstone_bringup/urdf/gemstone_ugv.urdf.xacro icindeki
+    # wheel_separation ile AYNI tutun.
+    wheel_separation: 0.30
+    max_wheel_speed: 1.0           # m/s, gercek motor/tekerlek olculerine gore ayarlayin
+    cmd_vel_timeout: 0.5
+    control_rate_hz: 20.0

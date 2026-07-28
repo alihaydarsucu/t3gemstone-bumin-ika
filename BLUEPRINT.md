@@ -8,96 +8,102 @@
 ## Mimari Özet
 
 ```
-T3 Gemstone
+T3 Gemstone O1 (tek kart)
 ├── A53 / Linux
-│   ├── Kamera sürücüsü
-│   ├── Kamera işleme örneği
-│   ├── RPLidar A1M8 USB bringup
-│   ├── Motor GPIO sürüşü
-│   └── Topic / launch orkestrasyonu
+│   ├── gemstone_imu             (ICM-20948, SPI /dev/spidev0.3)
+│   ├── gemstone_motor_driver    (diferansiyel surus -> UART)
+│   ├── gemstone_camera          (CSI kamera, v4l2_camera)
+│   ├── gemstone_image_proc      (goruntu isleme iskeleti)
+│   ├── gemstone_lidar_bringup   (sllidar_ros2 + rf2o + slam_toolbox + Nav2)
+│   ├── gemstone_obstacle_avoidance (lidar tabanli guvenlik karari)
+│   └── gemstone_bringup         (URDF + master launch)
 └── Harici Sistemler
-    ├── A1M8 RPLidar
-    ├── Motor sürücüsü
-    ├── Kamera
-    └── Robot gövdesi sensörleri
+    ├── A1M8 RPLidar (USB)
+    ├── Motor surucu kart (UART)
+    └── CSI kamera (IMX219/OV5640)
 ```
+
+Ayrı bir mikrodenetleyici (Deneyap vb.) **yok**; tüm sürücüler ve node'lar
+tek kartın (Gemstone O1) Linux tarafında çalışır.
 
 ---
 
 ## Temel Karar
 
-Bu projede ana karar şu şekildedir:
-
-- **İlk hedef Linux üzerinde çalışan tam bringup**
-- **A53 tarafı birincil çalışma yüzeyi**
-- **Motor kontrolü Linux node'ları ve servisleri ile başlar**
-- **Launch dosyası ile tüm bileşenler aynı anda başlar**
-- **Sonraki aşamada CLI ve seçim arayüzü eklenir**
-
-Bu karar, geliştirmeyi hızlandırır ve saha testlerini kolaylaştırır.
+- **Tek kart, tek Linux çalışma yüzeyi** — A53/Linux birincil ve tek katman
+- **Motor kontrolü**: Linux'tan (ROS node) UART üzerinden harici bir motor
+  sürücü karta komut gönderilir. GPIO'dan doğrudan sürme **tercih edilmedi**
+  çünkü ekip harici sürücü kart + UART protokolüne karar verdi (bkz. Açık
+  Sorular'ın cevaplandığı bölüm).
+- **Sürüş tipi**: diferansiyel sürüş (2 bağımsız tahrik tekeri + önde pasif
+  misket/caster teker). Ackermann/RC araba tipi değil.
+- **Launch dosyası ile tüm bileşenler aynı anda başlar**, her katman ayrı
+  ac/kapa argümanıyla (bkz. `docs/tr/bringup.md`)
+- **Standart ROS mesaj tipleri kullanılır** (özel `.msg` yok), bkz.
+  `interfaces/msg/README.md`
 
 ---
 
 ## Katmanlar
 
 ### 1. Board / Platform Layer
-- Gemstone kart yazılımı entegrasyonu
-- port / device discovery
-- USB cihaz eşleme
-- GPIO erişimi
-- servis bağımlılıkları
+- T3 Gemstone O1 (TI AM67A, Ubuntu/Debian tabanlı gerçek zamanlı çekirdek)
+- `/dev/spidev0.3` (dahili IMU), `/dev/ttyS0` (motor UART, UART-WKUP0),
+  `/dev/ttyUSB0` (RPLidar USB-seri), CSI0/CSI1 (kamera)
 
 ### 2. Driver Layer
-- kamera sürücüsü
-- lidar sürücüsü
-- motor GPIO kontrolü
-- power / battery / diagnostics
+- `gemstone_imu`: ICM-20948 SPI sürücüsü (T3 Foundation'ın resmi C kütüphanesi)
+- `gemstone_motor_driver`: diferansiyel sürüş kinematiği + UART çerçeve kodlayıcı
+- `gemstone_camera`: v4l2_camera launch (CSI, IMX219/OV5640)
+- `sllidar_ros2` (third-party): RPLidar A1M8 sürücüsü
 
 ### 3. Node Layer
-- kamera görüntü işleme node'u
-- lidar bringup node'u
-- motor kontrol node'u
-- telemetri / sağlık node'u
+- `gemstone_image_proc`: görüntü işleme iskeleti (şu an passthrough)
+- `gemstone_obstacle_avoidance`: `/scan`'e bakıp ileri hızı sınırlayan karar node'u
+- `slam_toolbox` (third-party): online haritalama
+- `nav2_bringup` (third-party): otonom navigasyon
 
 ### 4. Orchestration Layer
-- launch dosyası
-- servis başlatma sırası
-- opsiyonel CLI seçim akışı
-- ileride TUI / basit UI
+- `gemstone_bringup/launch/bringup.launch.py`: her katman için ayrı
+  enable/disable launch argümanı
+- Test sırası: önce her node tek başına, sonra hepsi birlikte
+  (bkz. `docs/tr/quickstart.md`)
+- CLI / seçim arayüzü: henüz yok, sonraki faz
 
 ---
 
 ## Mesajlaşma İlkesi
 
-Önerilen yaklaşım:
+Uygulanan yaklaşım:
 
-- her cihaz için ayrı topic grubu
+- her cihaz için ayrı topic
 - sürücü ve işleme node'u ayrımı
-- topic isimlerinde Gemstone / robot / modül ayrımı
+- standart ROS mesaj tipleri (özel `.msg` icat edilmedi)
 
-Örnek topic'ler:
+Gerçek topic'ler (bkz. `gemstone_ws/README.md` için tam tablo):
 
-- `/gemstone/camera/image_raw`
-- `/gemstone/camera/image_processed`
-- `/gemstone/lidar/scan`
-- `/gemstone/motor/state`
-- `/gemstone/motor/cmd`
-- `/gemstone/system/diagnostics`
+- `/imu/data_raw`, `/imu/data` (Madgwick filtreli)
+- `/cmd_vel`, `/cmd_vel_nav`
+- `/scan`, `/odom_rf2o`
+- `/obstacle_avoidance/blocked`
+- `/camera/image_raw`, `/camera/image_processed`
+- `/map`
+- `/diagnostics`
+
+> Not: Önceki taslakta önerilen `/gemstone/...` ön ekli topic isimleri
+> (ör. `/gemstone/imu/data`) **kullanılmadı**. Bunun yerine `cmd_vel`, `scan`
+> gibi ROS'un standart/varsayılan isimleri tercih edildi; böylece
+> `teleop_twist_keyboard`, Nav2, `rqt` gibi hazır araçlar ek remap
+> yapılmadan doğrudan çalışır.
 
 ---
 
 ## Donanım Sınırları
 
-Bu repo aşağıdaki alanları ayrı ele alır:
-
-- **Linux üzerinde tutulacaklar**
-  - kamera sürücüsü
-  - kamera işleme
-  - lidar bringup
-  - motor kontrol yazılımı
-  - launch orkestrasyonu
-
-Bu yaklaşım, sistemi tek ve açık bir Linux çalışma hattında tutar.
+- **Linux üzerinde tutulanlar**: kamera sürücüsü, kamera işleme, lidar
+  bringup, motor kontrol yazılımı, launch orkestrasyonu — hepsi
+- **RTOS/R5F**: bu sürümün kapsamı dışında (Gemstone'un R5F/NuttX çekirdeği
+  kullanılmıyor)
 
 ---
 
@@ -108,42 +114,58 @@ Bu yaklaşım, sistemi tek ve açık bir Linux çalışma hattında tutar.
 - [x] proje README
 - [x] blueprint
 - [x] doküman indeks yapısı
-- [ ] build sistemi seçimi
-- [ ] launch iskeleti
+- [x] build sistemi seçimi (colcon + ROS 2 Humble)
+- [x] launch iskeleti
 
 ### v0.2 - Linux Node'ları
-- [ ] kamera sürücüsü
-- [ ] kamera işleme örneği
-- [ ] lidar bringup
-- [ ] motor GPIO kontrolü
+- [x] kamera sürücüsü (v4l2_camera launch)
+- [x] kamera işleme örneği (iskelet, gerçek CV görevi bekliyor)
+- [x] lidar bringup (sllidar_ros2 + rf2o)
+- [x] motor UART sürücüsü (protokol yer tutucu, gerçek kartla doğrulanmadı)
 
 ### v0.3 - Orkestrasyon
-- [ ] tek launch dosyası
-- [ ] servis bağımlılıkları
+- [x] tek launch dosyası (`gemstone_bringup/launch/bringup.launch.py`)
+- [x] servis bağımlılıkları (her katman ayrı enable/disable argümanı)
 - [ ] basit CLI seçimi
-- [ ] log / health çıktı sistemi
+- [x] log / health çıktı sistemi (`diagnostic_updater`, `/diagnostics`)
 
 ### v0.4 - Donanım Genişleme
-- [ ] kartın kendi yazılımı ile birlikte çalışma
+- [ ] gerçek motor sürücü kartın UART protokolüyle doğrulama
 - [ ] diagnostics genişletme
-- [ ] saha testleri
+- [ ] saha testleri (kart üzerinde `colcon build` + tek tek node testi)
+- [ ] Nav2 `params.yaml`'ın gerçek araç ölçüleriyle tamamlanması
 
 ---
 
 ## Teknik Notlar
 
-1. Kamera sürücüsü ve görüntü işleme örneği aynı repo içinde ama farklı paketler olarak tutulur.
-2. Lidar USB üzerinden yönetilir; bringup tek launch ile başlatılır.
-3. Motor sürücüsü başlangıçta Linux + GPIO ile çalışır.
-4. CLI ve seçim arayüzü, tek launch akışının üstüne eklenir.
+1. Kamera sürücüsü ve görüntü işleme örneği aynı repo içinde ama farklı
+   paketler olarak tutulur (`gemstone_camera` / `gemstone_image_proc`).
+2. Lidar USB üzerinden yönetilir; bringup tek launch ile başlatılır
+   (`gemstone_lidar_bringup/launch/lidar_bringup.launch.py`), her katman
+   (`enable_rplidar`, `enable_rf2o`, `enable_slam_toolbox`, `enable_nav2`,
+   `enable_obstacle_avoidance`) ayrı açılıp kapanabilir.
+3. Motor sürücüsü Linux'tan UART üzerinden harici bir sürücü karta komut
+   gönderir; kinematik ve seri çerçeve kodlama ayrı, donanımsız test
+   edilebilir modüllere bölünmüştür (`differential_drive.py`, `protocol.py`).
+4. CLI ve seçim arayüzü, tek launch akışının üstüne ileride eklenecek.
 
 ---
 
-## Açık Sorular
+## Açık Sorular (cevaplandı)
 
-- Kamera hangi Linux sürücü modeliyle bağlanacak?
-- Lidar için ROS 2 paketi mi, özel node mu kullanılacak?
-- Motor GPIO kontrolü doğrudan kullanıcı uzayından mı, yoksa küçük bir servisle mi yürütülecek?
-- Launch akışı yalnızca ROS 2 ile mi, yoksa ek servis yöneticisiyle mi çalışacak?
+Önceki taslaktaki açık sorular netleşti:
 
-Bu sorular repo ilerledikçe netleştirilir.
+- **Kamera hangi Linux sürücü modeliyle bağlanacak?** → CSI (IMX219/OV5640),
+  `v4l2_camera` ROS 2 paketiyle.
+- **Lidar için ROS 2 paketi mi, özel node mu?** → Slamtec'in resmi
+  `sllidar_ros2` paketi (özel sürücü yazılmadı).
+- **Motor GPIO kontrolü doğrudan mı, küçük bir servisle mi?** → Ne biri ne
+  öbürü: motor, Linux'taki bir ROS node'undan (`gemstone_motor_driver`)
+  UART üzerinden harici bir sürücü karta komut göndererek çalışır. GPIO'dan
+  doğrudan sürme bu proje için tercih edilmedi.
+- **Launch akışı yalnızca ROS 2 ile mi?** → Evet, `ros2 launch` tabanlı;
+  ek bir servis yöneticisi (systemd vb.) şu an kullanılmıyor.
+
+Kalan açık nokta: motor sürücü kartın gerçek UART çerçeve protokolü henüz
+donanımla doğrulanmadı (bkz. `gemstone_motor_driver/protocol.py` içindeki not).

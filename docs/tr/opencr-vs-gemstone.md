@@ -57,31 +57,41 @@ Bu yüzden önerilen yapı:
 - her sensör için ayrı node
 - topic isimlendirmesinin Gemstone odaklı standardize edilmesi
 
-## Önerilen Proje Taslağı
+## Gerçekleşen Proje Yapısı
+
+Aşağıdaki taslak, aşağıdaki gerçek paket bölünmesine evrildi (bkz.
+`BLUEPRINT.md` ve `gemstone_ws/README.md`):
 
 ### Çekirdek Paketler
 
-- `gemstone_bringup`
-- `gemstone_drivers`
-- `gemstone_msgs`
-- `gemstone_diagnostics`
-- `gemstone_examples`
+- `gemstone_imu` — ICM-20948 SPI sürücüsü
+- `gemstone_motor_driver` — diferansiyel sürüş + UART motor sürücüsü
+- `gemstone_camera` / `gemstone_image_proc` — CSI kamera + görüntü işleme
+- `gemstone_lidar_bringup` — sllidar_ros2 + rf2o + slam_toolbox + Nav2
+- `gemstone_obstacle_avoidance` — lidar tabanlı güvenlik/karar node'u
+- `gemstone_bringup` — URDF + master launch
+
+Ayrı bir `gemstone_msgs` paketine gerek kalmadı: proje standart ROS mesaj
+tiplerini kullanıyor (bkz. `interfaces/msg/README.md`).
 
 ### Başlangıç Donanım Akışı
 
-- Gemstone dahili sensörleri
-- USB üzerinden `A1M8` RPLidar
-- kamera sürücüsü
-- harici motor sürücüsü
-- sistem sağlık bilgileri
+- Gemstone dahili sensörleri (ICM-20948 IMU)
+- USB üzerinden `A1M8` RPLidar (`sllidar_ros2`)
+- CSI kamera sürücüsü (`v4l2_camera`)
+- harici motor sürücüsü (UART)
+- sistem sağlık bilgileri (`diagnostic_updater`)
 
-### Örnek Topic'ler
+### Gerçek Topic'ler
 
-- `/gemstone/imu/data`
-- `/gemstone/lidar/scan`
-- `/gemstone/camera/image_raw`
-- `/gemstone/motor/state`
-- `/gemstone/system/diagnostics`
+`/gemstone/...` ön eki yerine ROS'un standart/varsayılan isimleri
+kullanılıyor (teleop/Nav2/rqt gibi hazır araçlarla uyumluluk için):
+
+- `/imu/data_raw`, `/imu/data`
+- `/scan`, `/odom_rf2o`
+- `/camera/image_raw`, `/camera/image_processed`
+- `/cmd_vel`, `/cmd_vel_nav`
+- `/diagnostics`
 
 ## Dokümantasyon Taslağı
 

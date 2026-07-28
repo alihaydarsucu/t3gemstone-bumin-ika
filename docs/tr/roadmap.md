@@ -7,25 +7,34 @@
 - [x] doküman indeksi
 
 ## v0.2 - Linux Temeli
-- [ ] board bringup
-- [ ] systemd servis taslağı
-- [ ] ROS 2 launch iskeleti
-- [ ] publish helper
+- [x] board bringup (T3 Gemstone O1, ROS 2 Humble)
+- [ ] systemd servis taslağı (şu an manuel `ros2 launch`)
+- [x] ROS 2 launch iskeleti (`gemstone_bringup/launch/bringup.launch.py`)
+- [x] publish helper (her paket kendi node'unda)
 
 ## v0.3 - Sürücüler
-- [ ] IMU
-- [ ] lidar
-- [ ] motor sürücüsü
-- [ ] kamera sürücüsü
+- [x] IMU (`gemstone_imu`, ICM-20948 SPI, T3 Foundation C kütüphanesi)
+- [x] lidar (`gemstone_lidar_bringup`, sllidar_ros2 + rf2o_laser_odometry)
+- [x] motor sürücüsü (`gemstone_motor_driver`, UART; gerçek protokol henüz
+      doğrulanmadı)
+- [x] kamera sürücüsü (`gemstone_camera`, CSI + v4l2_camera)
 
 ## v0.4 - Örnekler
-- [ ] kamera işleme örneği
-- [ ] lidar bringup örneği
-- [ ] robot base örneği
-- [ ] diagnostics / health node'u
+- [x] kamera işleme örneği (`gemstone_image_proc`, iskelet/passthrough)
+- [x] lidar bringup örneği (`gemstone_lidar_bringup`)
+- [ ] robot base örneği (URDF var, gerçek ölçüler eksik)
+- [x] diagnostics / health node'u (`diagnostic_updater`, `/diagnostics`)
 
 ## v1.0 - Kullanılabilir Çekirdek
-- [ ] sensör topic'leri
-- [ ] motor kontrol akışı
-- [ ] kamera pipeline
-- [ ] güvenli kapanış / watchdog
+- [x] sensör topic'leri (IMU, lidar, kamera)
+- [x] motor kontrol akışı (kod hazır, saha testi bekliyor)
+- [x] kamera pipeline (iskelet hazır, gerçek CV görevi eksik)
+- [x] güvenli kapanış / watchdog (motor cmd_vel timeout, obstacle avoidance
+      fail-safe stale-scan davranışı)
+
+## v1.1 - Saha Doğrulama (yeni)
+- [ ] karta bağlanıp `colcon build` + tek tek node testi
+- [ ] motor sürücü kartın gerçek UART protokolüyle doğrulama
+- [ ] URDF ölçülerinin gerçek araçla güncellenmesi
+- [ ] Nav2 `params.yaml`'ın tamamlanması (bkz. `nav2_overrides.md`)
+- [ ] basit CLI / seçim arayüzü

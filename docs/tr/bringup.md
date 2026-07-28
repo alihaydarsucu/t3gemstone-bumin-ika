@@ -15,13 +15,24 @@ Bu proje için bringup şu adımları kapsar:
 
 - güç verilir
 - Linux ayağa kalkar
-- systemd veya benzeri servis yöneticisi bringup servisini başlatır
-- ROS 2 launch çalışır
-- ICM-20948 IMU node'u başlatılır
-- A1M8 için Slamtec ROS 2 lidar launch'u başlatılır
-- IMU verisi `/gemstone/imu/data` topic'ine akar
-- lidar verisi `/scan` ve ilgili topic'lere akar
+- `ros2 launch gemstone_bringup bringup.launch.py` çalıştırılır
+- `gemstone_imu` (ICM-20948, SPI) başlatılır -> `imu/data_raw`
+- `gemstone_motor_driver` başlatılır, `cmd_vel`'i dinlemeye başlar
+- `gemstone_camera` (v4l2_camera, CSI) başlatılır -> `camera/image_raw`
+- `gemstone_image_proc` başlatılır -> `camera/image_processed`
+- `gemstone_lidar_bringup` başlatılır: `sllidar_ros2` -> `scan`,
+  `rf2o_laser_odometry` -> `odom_rf2o`, `gemstone_obstacle_avoidance` devrede
+- istenirse `enable_slam_toolbox:=true` ile haritalama, `enable_nav2:=true`
+  ile otonom navigasyon eklenir
+
+## Önerilen Sıra
+
+Hepsini birden açmadan önce her katmanı tek tek doğrulamak için
+`gemstone_ws/README.md` içindeki "Önerilen test sırası" bölümüne bakın:
+önce IMU, sonra motor sürücü (teker havada/blok üzerinde), sonra kamera,
+sonra lidar, sonra engelden kaçınma, sonra haritalama, en son Nav2.
 
 ## Hedef Çıktı
 
-Bu bölüm sonunda tek kart, robot kontrolü için kullanılabilir bir durumda olur.
+Bu bölüm sonunda tek kart, `ros2 launch gemstone_bringup bringup.launch.py`
+ile robot kontrolü için kullanılabilir bir durumda olur.
