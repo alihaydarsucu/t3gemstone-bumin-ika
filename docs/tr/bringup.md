@@ -17,9 +17,10 @@ Bu proje için bringup şu adımları kapsar:
 - Linux ayağa kalkar
 - systemd veya benzeri servis yöneticisi bringup servisini başlatır
 - ROS 2 launch çalışır
-- sürücüler başlatılır
-- sensörler yayın yapmaya başlar
-- motor kontrolü etkinleşir
+- ICM-20948 IMU node'u başlatılır
+- A1M8 için Slamtec ROS 2 lidar launch'u başlatılır
+- IMU verisi `/gemstone/imu/data` topic'ine akar
+- lidar verisi `/scan` ve ilgili topic'lere akar
 
 ## Hedef Çıktı
 

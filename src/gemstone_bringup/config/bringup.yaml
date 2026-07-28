@@ -1,6 +1,7 @@
-gemstone_bringup:
+gemstone_imu:
   ros__parameters:
-    enable_camera: true
-    enable_lidar: true
-    enable_motor: true
-    status_topic: /gemstone/system/status
+    spi_device: /dev/spidev0.3
+    frame_id: icm20948_link
+    publish_rate_hz: 100.0
+    linear_accel_stddev: 0.02
+    angular_velocity_stddev: 0.01

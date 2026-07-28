@@ -17,10 +17,22 @@ ROS 2 kurulu bir sistemde tipik akış:
 2. ortamı `source install/setup.bash` ile yükleme
 3. `ros2 launch gemstone_bringup bringup.launch.py` ile çalıştırma
 
+## Gerekli Bağımlılıklar
+
+- ROS 2 Humble
+- `python3-spidev`
+- Slamtec ROS 2 lidar paketi `sllidar_ros2`
+- `/dev/spidev0.3` erişimi
+- `/dev/ttyUSB0` erişimi
+
+Varsayılan A1M8 baudrate değeri `115200` olarak ayarlanır.
+
 ## Container Yolu
 
 Bu repo içinde bir `Dockerfile` bulunur.
 Bu yol, ROS 2 Humble kurulumu olmayan ya da yerel binary paketleri için uygun olmayan sistemlerde daha güvenli bir test ortamı sağlar.
+
+Not: IMU node'u container içinde çalıştırmak için `python3-spidev` gerekir; lidar tarafı için `sllidar_ros2` paketinin aynı ortamda mevcut olması gerekir.
 
 Önerilen akış:
 

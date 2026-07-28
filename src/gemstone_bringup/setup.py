@@ -22,7 +22,7 @@ setup(
     license="Apache-2.0",
     entry_points={
         "console_scripts": [
-            "bringup_node = gemstone_bringup.bringup_node:main",
+            "imu_node = gemstone_bringup.imu_node:main",
         ],
     },
 )

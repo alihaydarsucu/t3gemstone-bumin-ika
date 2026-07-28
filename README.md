@@ -11,6 +11,12 @@
 Bu repo, Gemstone üzerinde **Linux-first bir ROS bringup sistemi** kurmak için hazırlanmıştır.
 Ana hedef, donanımı tek bir uygulama ailesi altında toplamak ve sistem başlangıcını tek komutla yönetmektir.
 
+Şu anda bringup hattı:
+
+- `ICM-20948` IMU verisini `/gemstone/imu/data` olarak yayınlar
+- A1M8 lidar için Slamtec ROS 2 driver launch'unu açar
+- sensörleri gerçek cihaz erişimiyle ayağa kaldırmayı hedefler
+
 İlk sürümde odak şu şekildedir:
 
 - Gemstone üzerindeki kart yazılımı ile birlikte çalışmak,
