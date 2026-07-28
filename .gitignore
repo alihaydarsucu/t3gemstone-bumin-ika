@@ -4,6 +4,7 @@ log/
 .colcon/
 *.pyc
 __pycache__/
+.pytest_cache/
 *.swp
 *.swo
 .venv/

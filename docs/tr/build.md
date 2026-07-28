@@ -20,19 +20,30 @@ ROS 2 kurulu bir sistemde tipik akış:
 ## Gerekli Bağımlılıklar
 
 - ROS 2 Humble
-- `python3-spidev`
-- Slamtec ROS 2 lidar paketi `sllidar_ros2`
-- `/dev/spidev0.3` erişimi
-- `/dev/ttyUSB0` erişimi
+- Slamtec ROS 2 lidar paketi `sllidar_ros2` (apt'ta yoksa kaynak koddan clone)
+- `rf2o_laser_odometry` (apt'ta yoksa kaynak koddan clone)
+- `ros-humble-v4l2-camera`, `ros-humble-cv-bridge` (kamera)
+- `ros-humble-slam-toolbox`, `ros-humble-navigation2`, `ros-humble-nav2-bringup`
+- `ros-humble-imu-filter-madgwick`
+- `ros-humble-robot-state-publisher`, `ros-humble-joint-state-publisher`, `ros-humble-xacro`
+- `ros-humble-diagnostic-updater`
+- `python3-serial` (motor UART), `python3-opencv`
+- `/dev/spidev0.3` erişimi (dahili IMU)
+- `/dev/ttyS0` erişimi (motor UART)
+- `/dev/ttyUSB0` erişimi (RPLidar)
 
-Varsayılan A1M8 baudrate değeri `115200` olarak ayarlanır.
+Tam kurulum komutu için [../../gemstone_ws/README.md](../../gemstone_ws/README.md)'ye
+bakın. Varsayılan A1M8 baudrate değeri `115200` olarak ayarlanır.
 
 ## Container Yolu
 
 Bu repo içinde bir `Dockerfile` bulunur.
-Bu yol, ROS 2 Humble kurulumu olmayan ya da yerel binary paketleri için uygun olmayan sistemlerde daha güvenli bir test ortamı sağlar.
+Bu yol, ROS 2 Humble kurulumu olmayan ya da yerel binary paketleri için uygun olmayan sistemlerde daha güvenli bir test ortamı sağlar. Dockerfile, apt'ta olmayan
+`rf2o_laser_odometry` ve `sllidar_ros2`'yi build sırasında otomatik clone'lar.
 
-Not: IMU node'u container içinde çalıştırmak için `python3-spidev` gerekir; lidar tarafı için `sllidar_ros2` paketinin aynı ortamda mevcut olması gerekir.
+Not: gerçek donanım erişimi (SPI/UART/CSI) sadece kartın kendisinde mümkündür;
+container yalnızca derleme/kod testinde yardımcı olur, donanımsız node'ları
+(kinematik, protokol, lidar karar mantığı gibi) test etmek için de kullanılabilir.
 
 Önerilen akış:
 

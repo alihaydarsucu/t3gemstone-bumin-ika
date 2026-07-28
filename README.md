@@ -1,104 +1,85 @@
 # T3 Gemstone ROS Bringup
 
-> **[TR]** T3 Gemstone üzerinde sensör, kamera, lidar ve motor akışlarını tamamen Linux tarafında çalışan ROS 2 node'larıyla tek launch üzerinden ayağa kaldıran geliştirme projesi.
+> **[TR]** T3 Gemstone O1 karti uzerinde calisan, diferansiyel suruslu (2 tahrik teker + on misket teker) bir insansiz kara araci (IKA) icin sensor, kamera, lidar ve motor akislarini tek launch uzerinden ayaga kaldiran ROS 2 Humble bringup projesi.
 >
-> **[EN]** A T3 Gemstone development project that brings up the related sensor ROS nodes with a single launch flow and manages camera, lidar, and motor workflows in a modular way.
+> **[EN]** A ROS 2 Humble bringup project for a differential-drive (2 driven wheels + front caster) unmanned ground vehicle running on the T3 Gemstone O1 board, bringing up IMU, camera, lidar and motor workflows through a single launch flow.
 
 ---
 
 ## Kısa Tanım
 
-Bu repo, Gemstone üzerinde **Linux-first bir ROS bringup sistemi** kurmak için hazırlanmıştır.
-Ana hedef, donanımı tek bir uygulama ailesi altında toplamak ve sistem başlangıcını tek komutla yönetmektir.
+Bu repo, T3 Gemstone O1 kartı üzerinde **Linux-first bir ROS 2 bringup sistemi** kurar.
+Tek kart tüm görevleri üstlenir: motor/teker sürme, dahili IMU okuma, lidar tabanlı
+karar/harita/otonomi, kamera + görüntü işleme. Ayrı bir mikrodenetleyici (Deneyap
+vb.) yok; motor sürücüsü harici bir sürücü karta UART üzerinden bağlanır.
 
-Şu anda bringup hattı:
+Bringup hattı şunları yapar:
 
-- `ICM-20948` IMU verisini `/gemstone/imu/data` olarak yayınlar
-- A1M8 lidar için Slamtec ROS 2 driver launch'unu açar
-- sensörleri gerçek cihaz erişimiyle ayağa kaldırmayı hedefler
-
-İlk sürümde odak şu şekildedir:
-
-- Gemstone üzerindeki kart yazılımı ile birlikte çalışmak,
-- sensör topic'lerini Linux üzerinde üretmek,
-- kamerayı ve görüntü işleme örneğini Linux'ta çalıştırmak,
-- `A1M8` RPLidar'ı USB üzerinden bağlamak,
-- harici motor sürücüsünü GPIO, UART, CAN veya USB üzerinden yönetmek,
-- hepsini aynı anda başlatan bir launch dosyası kullanmak.
+- `ICM-20948` dahili IMU'yu SPI (`/dev/spidev0.3`) üzerinden okuyup `imu/data_raw`
+  yayınlar (T3 Foundation'ın resmi C sürücü kütüphanesiyle)
+- `/cmd_vel`'i diferansiyel sürüş kinematiğiyle sol/sağ teker hızına çevirip UART
+  üzerinden harici motor sürücü karta yazar
+- CSI kamerayı (`v4l2_camera`) açıp `camera/image_raw` yayınlar
+- `A1M8` RPLidar'ı Slamtec'in resmi `sllidar_ros2` paketiyle bağlar
+- lidar verisiyle gerçek zamanlı engelden kaçınma, `slam_toolbox` ile haritalama
+  ve Nav2 ile otonom navigasyon sağlar
+- hepsini tek bir launch dosyasıyla (`gemstone_bringup/launch/bringup.launch.py`)
+  başlatır
 
 ---
 
 ## Tasarım İlkesi
 
-1. **A53 / Linux = ana çalışma katmanı**
-   - kamera sürücüsü
-   - görüntü işleme node'u
-   - lidar bringup
-   - topic üretimi
-   - launch yönetimi
-
-2. **Topic odaklı tasarım**
-   - her donanım için net topic sözleşmesi
-   - launch ile birlikte kolay başlatma
-   - CLI ve seçim arayüzüne uygun modüler yapı
-
-3. **Kademeli mimari**
-   - önce Linux'ta çalışan sürücü ve örnekler
-   - sonra gerekiyorsa ek ROS paketleri ve servisler
-
----
-
-## Hedef Kapsam
-
-- Gemstone kart yazılımı ile uyumlu Linux tabanlı bringup
-- Harici IKA projesi için
-  - `A1M8` RPLidar via USB
-  - kamera sürücüsü
-  - kamera görüntü işleme örnek node'u
-  - motor sürücüsü via GPIO, UART veya CAN
-- Tek launch dosyası ile tüm bileşenleri başlatma
-- Sonraki aşamada basit CLI ve seçim arayüzü
-- Uzun vadede daha fazla ROS paketi, servis ve otomasyon ekleme
+1. **A53 / Linux = ana çalışma katmanı** — kart üzerinde ayrı bir mikrodenetleyici
+   yok, tüm sürücüler ve node'lar Gemstone'un Linux tarafında çalışır.
+2. **Sürücü / node ayrımı** — her donanım için ayrı bir paket: `gemstone_imu`,
+   `gemstone_motor_driver`, `gemstone_camera`, `gemstone_image_proc`,
+   `gemstone_lidar_bringup`, `gemstone_obstacle_avoidance`.
+3. **Standart ROS mesaj tipleri** — özel mesaj tipi icat etmek yerine
+   `sensor_msgs`, `geometry_msgs`, `std_msgs`, `diagnostic_msgs` kullanılır; böylece
+   teleop, rqt, Nav2, slam_toolbox gibi standart araçlarla doğrudan uyumlu olunur
+   (bkz. [interfaces/msg/README.md](interfaces/msg/README.md)).
+4. **Kademeli doğrulama** — her node önce tek başına test edilir, sonra hepsi
+   `bringup.launch.py` altında birleştirilir (bkz.
+   [docs/tr/quickstart.md](docs/tr/quickstart.md)).
 
 ---
 
 ## Repo Haritası
 
 - `docs/` - proje dokümantasyonu
-- `src/` - ROS 2 paketleri ve uygulama kodu
-- `src/gemstone_bringup/launch/` - ana launch akışı
-- `examples/` - örnek senaryo notları
-- `interfaces/` - mesaj ve IPC sözleşmeleri
+- `src/` - ROS 2 paketleri
+  - `gemstone_imu` - ICM-20948 SPI sürücüsü (C++)
+  - `gemstone_motor_driver` - diferansiyel sürüş + UART motor sürücüsü (Python)
+  - `gemstone_camera` - CSI kamera launch (v4l2_camera)
+  - `gemstone_image_proc` - görüntü işleme iskeleti
+  - `gemstone_obstacle_avoidance` - lidar tabanlı güvenlik/karar node'u
+  - `gemstone_lidar_bringup` - sllidar_ros2 + rf2o + slam_toolbox + Nav2
+  - `gemstone_bringup` - URDF, ortak parametreler, master launch
+- `examples/` - örnek senaryo notları (gerçek implementasyonlara işaret eder)
+- `interfaces/` - mesaj ve IPC sözleşme kararları
 - `hardware/` - bağlantı ve donanım notları
-- `tools/` - CLI ve yardımcı script alanı
+- `tools/` - CLI ve yardımcı script alanı (henüz boş)
 
 ---
 
 ## Durum
 
-Bu repo bir **Linux-first taslak başlangıç noktası**dır.
-İçerik, geliştirme başlamadan önce modüler yapıyı ve tek katmanlı çalışma yolunu netleştirmek için hazırlanmıştır.
-
 | Alan | Durum | Not |
 |---|---:|---|
-| Linux bringup | Taslak | A53 üzerinde ana akış |
-| Kamera sürücüsü | Taslak | Linux'ta çalışacak |
-| Kamera işleme örneği | Taslak | Basit görüntü işleme node'u |
-| RPLidar A1M8 desteği | Taslak | USB üzerinden |
-| Motor sürücü desteği | Taslak | GPIO üzerinden |
-| Launch orkestrasyonu | Taslak | Tek komutla start |
-| CLI / seçim arayüzü | Taslak | Sonraki faz |
-| Ek ROS paketleri | Taslak | Lidar, kamera, motor ve diagnostic genişleme |
+| Linux bringup | Calisiyor (henuz saha testi yok) | Tek launch, tum katmanlar ayri ac/kapa argumanli |
+| IMU (ICM-20948) | Kod hazir | T3 Foundation C kutuphanesi + ROS 2 node |
+| Motor surucu | Kod hazir, protokol yer tutucu | UART cercevesi gercek surucu kartla dogrulanmadi |
+| Kamera (CSI) | Kod hazir | v4l2_camera ile |
+| Goruntu isleme | Iskelet | Gercek CV gorevi henuz yok |
+| RPLidar A1M8 | Kod hazir | sllidar_ros2 ile |
+| Engelden kacinma | Kod hazir | Birim testleriyle dogrulandi |
+| SLAM (slam_toolbox) | Kod hazir | Saha testi bekliyor |
+| Nav2 | Launch hazir, params eksik | bkz. nav2_overrides.md |
+| CLI / secim arayuzu | Planlandi | Sonraki faz |
 
----
-
-## Başlangıç Notu
-
-Bu projenin ana amacı şudur:
-
-> Gemstone üzerinde tek launch ile çalışan, sensör ve kamera topic'lerini Linux tarafında üreten bir ROS bringup altyapısı kurmak.
-
-Bu yüzden doküman dili kısa, doğrudan ve geliştirmeye dönüktür.
+Detaylı ilerleme için [docs/tr/roadmap.md](docs/tr/roadmap.md) ve
+[docs/tr/revision.md](docs/tr/revision.md).
 
 ---
 
@@ -107,3 +88,4 @@ Bu yüzden doküman dili kısa, doğrudan ve geliştirmeye dönüktür.
 - Yerel kurulum notları için [docs/tr/build.md](docs/tr/build.md)
 - Detaylı çalıştırma kılavuzu için [docs/tr/quickstart.md](docs/tr/quickstart.md)
 - Hızlı ve izole deneme için kökteki `Dockerfile`
+- Mimari kararlar için [BLUEPRINT.md](BLUEPRINT.md)

@@ -2,7 +2,9 @@
 
 ## T3 Gemstone Linux ROS Bringup
 
-Bu proje, T3 Gemstone üzerinde **tamamen Linux tarafında çalışan** bir robotik bringup katmanı kurmak için hazırlanmıştır.
+Bu proje, T3 Gemstone O1 kartı üzerinde **tamamen Linux tarafında çalışan** bir
+robotik bringup katmanı kurmak için hazırlanmıştır. Hedef araç: diferansiyel
+sürüşlü (2 tahrik teker + ön misket teker) bir insansız kara aracı (İKA).
 Hedef, OpenCR benzeri "açılışta otomatik topic yayını" davranışını Gemstone'un Linux mimarisine uyarlamaktır.
 
 ## Neden Bu Proje?

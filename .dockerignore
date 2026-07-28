@@ -5,6 +5,7 @@ log/
 .gitignore
 __pycache__/
 *.pyc
+.pytest_cache/
 *.swp
 *.swo
 .DS_Store

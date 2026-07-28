@@ -1,0 +1,11 @@
+icm20948_driver_node:
+  ros__parameters:
+    spi_device: /dev/spidev0.3    # bkz. docs.t3gemstone.org/tr/boards/o1/peripherals/imu.md
+    frame_id: imu_link
+    publish_rate_hz: 100.0
+
+imu_filter_madgwick_node:
+  ros__parameters:
+    use_mag: false                # ICM-20948 manyetometresi bagli degilse false birakin
+    publish_tf: false             # map/odom TF'ini karistirmasin diye kapali; robot_localization kullanilirsa o yönetsin
+    world_frame: enu

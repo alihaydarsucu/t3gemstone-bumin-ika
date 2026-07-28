@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<robot name="gemstone_ugv" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!--
+    Minimal iskelet URDF: base_link + 2 tahrik tekeri + 1 on misket teker +
+    imu_link/lidar_link/camera_link icin sabit (fixed) TF cerceveleri.
+
+    ONEMLI: Asagidaki tum olcu/kutle degerleri YER TUTUCUDUR. Aracin gercek
+    olculerini aldiktan sonra bu xacro:property degerlerini guncelleyin.
+    wheel_separation, gemstone_motor_driver'in motor_driver_params.yaml
+    dosyasindaki wheel_separation ile AYNI olmali; iki yerde ayri ayri
+    tutuluyor olmasi bir teknik borc (tech debt); ROS 2 tarafinda tek bir
+    kaynaktan okutmanin temiz bir yolu yok, degistirince ikisini de guncelleyin.
+  -->
+
+  <xacro:property name="chassis_length" value="0.30"/>
+  <xacro:property name="chassis_width" value="0.20"/>
+  <xacro:property name="chassis_height" value="0.10"/>
+  <xacro:property name="chassis_mass" value="2.0"/>
+
+  <xacro:property name="wheel_radius" value="0.033"/>
+  <xacro:property name="wheel_width" value="0.026"/>
+  <xacro:property name="wheel_mass" value="0.05"/>
+  <!-- gemstone_motor_driver/params/motor_driver_params.yaml ile ayni tutun -->
+  <xacro:property name="wheel_separation" value="0.30"/>
+  <xacro:property name="wheel_x_offset" value="-0.05"/>
+
+  <xacro:property name="caster_radius" value="0.015"/>
+  <xacro:property name="caster_x_offset" value="0.12"/>
+
+  <material name="gemstone_gray">
+    <color rgba="0.5 0.5 0.5 1.0"/>
+  </material>
+  <material name="gemstone_black">
+    <color rgba="0.1 0.1 0.1 1.0"/>
+  </material>
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+      <material name="gemstone_gray"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${chassis_mass}"/>
+      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.02" iyz="0.0" izz="0.02"/>
+    </inertial>
+  </link>
+
+  <xacro:macro name="drive_wheel" params="prefix y_reflect">
+    <link name="${prefix}_wheel_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <material name="gemstone_black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="${wheel_mass}"/>
+        <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel_link"/>
+      <origin xyz="${wheel_x_offset} ${y_reflect * wheel_separation / 2.0} 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:drive_wheel prefix="left" y_reflect="1"/>
+  <xacro:drive_wheel prefix="right" y_reflect="-1"/>
+
+  <link name="caster_wheel_link">
+    <visual>
+      <geometry>
+        <sphere radius="${caster_radius}"/>
+      </geometry>
+      <material name="gemstone_black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="${caster_radius}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.02"/>
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001"/>
+    </inertial>
+  </link>
+
+  <joint name="caster_wheel_joint" type="fixed">
+    <!-- Misket teker pasif/serbest doner; TF agacinda basitlik icin fixed
+         olarak modellendi. Gercek fizik simulasyonu gerekiyorsa (Gazebo vb.)
+         bunu bir "ball caster" plugin'iyle degistirin. -->
+    <parent link="base_link"/>
+    <child link="caster_wheel_link"/>
+    <origin xyz="${caster_x_offset} 0 ${-chassis_height/2}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Sensor cerceveleri: gercek montaj konumlarina gore origin degerlerini guncelleyin -->
+
+  <link name="imu_link"/>
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="lidar_link"/>
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0 0 ${chassis_height/2 + 0.05}" rpy="0 0 0"/>
+  </joint>
+
+  <link name="camera_link"/>
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="${chassis_length/2} 0 ${chassis_height/2}" rpy="0 0 0"/>
+  </joint>
+
+</robot>
