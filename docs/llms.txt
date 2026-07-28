@@ -1,0 +1,13 @@
+# T3 Gemstone Linux ROS Bringup Documentation Index
+
+- /docs/tr/introduction.md
+- /docs/tr/architecture.md
+- /docs/tr/r5f.md
+- /docs/tr/drivers.md
+- /docs/tr/camera.md
+- /docs/tr/bringup.md
+- /docs/tr/roadmap.md
+- /docs/tr/faq.md
+- /docs/tr/troubleshooting.md
+- /docs/tr/revision.md
+- /docs/tr/opencr-vs-gemstone.md
