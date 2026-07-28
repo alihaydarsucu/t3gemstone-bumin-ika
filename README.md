@@ -104,6 +104,6 @@ Bu yüzden doküman dili kısa, doğrudan ve geliştirmeye dönüktür.
 
 ## Build
 
-- Yerel kurulum notları için [docs/tr/build.md](/home/ali/Projeler/t3-gemstone-ros-bringup/docs/tr/build.md)
-- Detaylı çalıştırma kılavuzu için [docs/tr/quickstart.md](/home/ali/Projeler/t3-gemstone-ros-bringup/docs/tr/quickstart.md)
+- Yerel kurulum notları için [docs/tr/build.md](docs/tr/build.md)
+- Detaylı çalıştırma kılavuzu için [docs/tr/quickstart.md](docs/tr/quickstart.md)
 - Hızlı ve izole deneme için kökteki `Dockerfile`
