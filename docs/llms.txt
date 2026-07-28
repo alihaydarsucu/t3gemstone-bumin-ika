@@ -11,3 +11,4 @@
 - /docs/tr/troubleshooting.md
 - /docs/tr/revision.md
 - /docs/tr/opencr-vs-gemstone.md
+- /docs/tr/build.md

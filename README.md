@@ -93,3 +93,10 @@ Bu projenin ana amacı şudur:
 > Gemstone üzerinde tek launch ile çalışan, sensör ve kamera topic'lerini Linux tarafında üreten bir ROS bringup altyapısı kurmak.
 
 Bu yüzden doküman dili kısa, doğrudan ve geliştirmeye dönüktür.
+
+---
+
+## Build
+
+- Yerel kurulum ve çalışma notları için [docs/tr/build.md](/home/ali/Projeler/t3-gemstone-ros-bringup/docs/tr/build.md)
+- Hızlı ve izole deneme için kökteki `Dockerfile`
