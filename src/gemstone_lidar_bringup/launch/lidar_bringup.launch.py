@@ -79,6 +79,7 @@ def generate_launch_description():
             'base_frame_id': 'base_link',
             'odom_frame_id': 'odom',
             'freq': 20.0,
+            'init_pose_from_topic': '',
         }],
     )
 

@@ -9,3 +9,5 @@ __pycache__/
 *.swo
 .venv/
 .DS_Store
+src/rf2o_laser_odometry/
+src/sllidar_ros2/
