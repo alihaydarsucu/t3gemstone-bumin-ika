@@ -1,8 +1,8 @@
-# T3 Gemstone ROS Bringup
+# T3 Gemstone Bumin İKA 
 
-> **[TR]** T3 Gemstone O1 karti uzerinde calisan, diferansiyel suruslu (2 tahrik teker + on misket teker) bir insansiz kara araci (IKA) icin sensor, kamera, lidar ve motor akislarini tek launch uzerinden ayaga kaldiran ROS 2 Humble bringup projesi.
+> **[TR]** T3 Gemstone O1 kartı üzerinde çalışan, diferansiyel sürüşlü (2 tahrik teker + ön misket teker) bir insansız kara aracı (İKA) için sensör, kamera, lidar ve motor akışlarını tek launch üzerinden ayağa kaldıran ve otonom sürüş kodlarını da içeren, uçtan uca bir ROS 2 Humble projesi. 
 >
-> **[EN]** A ROS 2 Humble bringup project for a differential-drive (2 driven wheels + front caster) unmanned ground vehicle running on the T3 Gemstone O1 board, bringing up IMU, camera, lidar and motor workflows through a single launch flow.
+> **[EN]** A ROS 2 Humble project for a differential-drive (2 driven wheels + front caster) unmanned ground vehicle running on the T3 Gemstone O1 board, bringing up IMU, camera, lidar and motor workflows through a single launch flow, and including the full autonomous driving stack.
 
 ---
 
