@@ -15,8 +15,9 @@
 ## v0.3 - Sürücüler
 - [x] IMU (`gemstone_imu`, ICM-20948 SPI, T3 Foundation C kütüphanesi)
 - [x] lidar (`gemstone_lidar_bringup`, sllidar_ros2 + rf2o_laser_odometry)
-- [x] motor sürücüsü (`gemstone_motor_driver`, UART; gerçek protokol henüz
-      doğrulanmadı)
+- [x] motor sürücüsü (`gemstone_motor_driver`, GPIO/libgpiod + enkoder
+      odometrisi; gerçek pin numaraları henüz doğrulanmadı)
+- [x] ultrasonik sensör (`gemstone_ultrasonic`, GPIO/libgpiod)
 - [x] kamera sürücüsü (`gemstone_camera`, CSI + v4l2_camera)
 
 ## v0.4 - Örnekler
@@ -34,7 +35,11 @@
 
 ## v1.1 - Saha Doğrulama (yeni)
 - [ ] karta bağlanıp `colcon build` + tek tek node testi
-- [ ] motor sürücü kartın gerçek UART protokolüyle doğrulama
+- [ ] Gemstone'un gerçek GPIO chip adı/line offsetlerinin (`gpiodetect`,
+      `gpioinfo`) tespit edilip params dosyalarına yazılması
+- [ ] motor/enkoder yön işaretlerinin (invert parametreleri) doğrulanması
+- [ ] enkoder çözünürlüğünün (ticks_per_revolution) ölçülmesi
+- [ ] PWM-uyumlu fiziksel pinlerin bulunup değişken hız kontrolünün eklenmesi
 - [ ] URDF ölçülerinin gerçek araçla güncellenmesi
 - [ ] Nav2 `params.yaml`'ın tamamlanması (bkz. `nav2_overrides.md`)
 - [ ] basit CLI / seçim arayüzü

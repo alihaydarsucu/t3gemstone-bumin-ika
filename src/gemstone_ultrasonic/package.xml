@@ -1,23 +1,18 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>gemstone_motor_driver</name>
+  <name>gemstone_ultrasonic</name>
   <version>0.1.0</version>
   <description>
-    /cmd_vel (Twist) komutunu diferansiyel surus (2 tahrik teker + on misket teker)
-    kinematigiyle sol/sag teker yonune cevirip Gemstone'un GPIO'lari uzerinden
-    (libgpiod) Harezmi kartindaki MX1508 H-bridge'i suren ve kadratur
-    enkoderlerden tekerlek odometrisi ureten node.
+    Harezmi kartindaki HC-SR04 benzeri ultrasonik mesafe sensorlerini
+    (trig/echo, libgpiod uzerinden) okuyup sensor_msgs/Range yayinlayan node.
   </description>
   <maintainer email="gemstone@todo.todo">gemstone</maintainer>
   <license>Apache-2.0</license>
 
   <depend>rclpy</depend>
-  <depend>geometry_msgs</depend>
-  <depend>nav_msgs</depend>
-  <depend>tf2_ros</depend>
+  <depend>sensor_msgs</depend>
   <exec_depend>python3-libgpiod</exec_depend>
-  <exec_depend>tf_transformations</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

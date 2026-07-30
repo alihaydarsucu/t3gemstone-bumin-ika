@@ -3,12 +3,13 @@
 ## Genel Akış
 
 ```
-IMU (SPI) / A1M8 Lidar (USB) / CSI Kamera / Motor Sürücü Kart (UART)
+IMU (SPI) / A1M8 Lidar (USB) / CSI Kamera / Harezmi Motor+Enkoder+Ultrasonik (GPIO)
         │
         ▼
 A53 / Linux Katmanı (T3 Gemstone O1, tek kart)
         ├── gemstone_imu             -> imu/data_raw
-        ├── gemstone_motor_driver    -> UART (cmd_vel'i dinler)
+        ├── gemstone_motor_driver    -> GPIO/libgpiod (cmd_vel'i dinler, wheel_odom yayinlar)
+        ├── gemstone_ultrasonic      -> GPIO/libgpiod (ultrasonicN/range yayinlar)
         ├── gemstone_camera          -> camera/image_raw
         ├── gemstone_image_proc      -> camera/image_processed
         ├── gemstone_lidar_bringup   -> scan, odom_rf2o, map
@@ -19,7 +20,7 @@ A53 / Linux Katmanı (T3 Gemstone O1, tek kart)
 ## Katmanlar
 
 ### Linux / A53
-- board init (SPI/UART/CSI/USB cihaz erisimi)
+- board init (SPI/GPIO/CSI/USB cihaz erisimi)
 - driver init (her paket kendi donanimini acar)
 - topic publish (standart ROS mesaj tipleriyle)
 - watchdog (motor surucude cmd_vel timeout, obstacle avoidance'ta lidar stale-check)
@@ -31,8 +32,8 @@ A53 / Linux Katmanı (T3 Gemstone O1, tek kart)
 
 Bu projede sensör verisi ve ROS topic'leri tamamen Linux tarafında üretilir.
 Ayrı bir mikrodenetleyici (Deneyap vb.) veya RTOS/R5F katmanı **kullanılmıyor**;
-motor sürücüsü bile Linux'tan UART üzerinden harici bir sürücü karta komut
-göndererek çalışıyor.
+motor sürücüsü de Harezmi kartindaki Deneyap'in yerini alarak Gemstone'un
+kendi GPIO'larindan (libgpiod) motorlari suruyor ve enkoderleri okuyor.
 
 ## Tasarım Sonucu
 

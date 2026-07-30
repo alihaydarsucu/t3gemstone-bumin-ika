@@ -34,11 +34,13 @@ def generate_launch_description():
     xacro_file = os.path.join(bringup_share, 'urdf', 'gemstone_ugv.urdf.xacro')
     imu_params_file = os.path.join(bringup_share, 'params', 'imu_params.yaml')
     motor_params_file = os.path.join(bringup_share, 'params', 'motor_driver_params.yaml')
+    ultrasonic_params_file = os.path.join(bringup_share, 'params', 'ultrasonic_params.yaml')
 
     # --- Ust duzey ac/kapat argumanlari ---
     enable_imu = DeclareLaunchArgument('enable_imu', default_value='true')
     enable_imu_filter = DeclareLaunchArgument('enable_imu_filter', default_value='true')
     enable_motor_driver = DeclareLaunchArgument('enable_motor_driver', default_value='true')
+    enable_ultrasonic = DeclareLaunchArgument('enable_ultrasonic', default_value='false')
     enable_camera = DeclareLaunchArgument('enable_camera', default_value='true')
     enable_image_proc = DeclareLaunchArgument('enable_image_proc', default_value='true')
     enable_lidar_stack = DeclareLaunchArgument('enable_lidar_stack', default_value='true')
@@ -98,6 +100,15 @@ def generate_launch_description():
         parameters=[motor_params_file],
     )
 
+    ultrasonic_node = Node(
+        package='gemstone_ultrasonic',
+        executable='ultrasonic_node',
+        name='ultrasonic_node',
+        output='screen',
+        condition=IfCondition(LaunchConfiguration('enable_ultrasonic')),
+        parameters=[ultrasonic_params_file],
+    )
+
     camera_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution([camera_share, 'launch', 'camera.launch.py'])
@@ -136,6 +147,7 @@ def generate_launch_description():
         enable_imu,
         enable_imu_filter,
         enable_motor_driver,
+        enable_ultrasonic,
         enable_camera,
         enable_image_proc,
         enable_lidar_stack,
@@ -148,6 +160,7 @@ def generate_launch_description():
         imu_node,
         imu_filter_node,
         motor_driver_node,
+        ultrasonic_node,
         camera_launch,
         image_proc_node,
         lidar_stack_launch,

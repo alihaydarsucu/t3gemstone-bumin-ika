@@ -1,10 +1,48 @@
 motor_driver_node:
   ros__parameters:
-    serial_port: /dev/ttyS0        # UART-WKUP0, bkz. docs.t3gemstone.org/tr/boards/o1/peripherals/serial.md
-    baud_rate: 115200
+    # YER TUTUCU: karta baglanip `gpiodetect` ile gercek chip adini,
+    # `gpioinfo` ile gercek line offsetlerini bulup asagidakileri
+    # doldurun. Doldurulmadan (gpio_chip bos / line'lar -1) node acilmaz.
+    gpio_chip: ''
+
+    # Motor 1 (sol) -- Harezmi/Deneyap pin haritasinda D12/D13 idi
+    motor1_in1_line: -1
+    motor1_in2_line: -1
+    motor1_invert: false
+
+    # Motor 2 (sag) -- Harezmi/Deneyap pin haritasinda D14/D15 idi
+    motor2_in1_line: -1
+    motor2_in2_line: -1
+    motor2_invert: false
+
+    # Enkoder 1 (motor 1 ile ayni taraf) -- Deneyap'ta D2 (Kanal A,
+    # interrupt) / D9 (Kanal B) idi
+    encoder1_a_line: -1
+    encoder1_b_line: -1
+    encoder1_invert: false
+
+    # Enkoder 2 (motor 2 ile ayni taraf) -- Deneyap'ta D3 (Kanal A,
+    # interrupt) / A7-D16 (Kanal B) idi
+    encoder2_a_line: -1
+    encoder2_b_line: -1
+    encoder2_invert: false
+
+    # YER TUTUCU: tekerlegi elle tam bir tur cevirip tik sayisini sayarak
+    # gercek degeri bulun.
+    encoder_ticks_per_revolution: 20.0
+    # DIKKAT: gemstone_bringup/urdf/gemstone_ugv.urdf.xacro icindeki
+    # wheel_radius ile AYNI tutun.
+    wheel_radius: 0.033
+
     # DIKKAT: gemstone_bringup/urdf/gemstone_ugv.urdf.xacro icindeki
     # wheel_separation ile AYNI tutun.
     wheel_separation: 0.30
     max_wheel_speed: 1.0           # m/s, gercek motor/tekerlek olculerine gore ayarlayin
     cmd_vel_timeout: 0.5
     control_rate_hz: 20.0
+
+    odom_frame_id: odom
+    base_frame_id: base_link
+    # False birakin: odom->base_link TF'ini su an rf2o_laser_odometry
+    # sagliyor (publish_tf:true). Ikisi birden acarsa cakisir.
+    publish_tf: false

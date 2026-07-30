@@ -15,6 +15,5 @@ paketinde yaşıyor (`launch/lidar_bringup.launch.py`).
 ## Sonraki Adım
 
 Kart üzerinde tek tek doğrulama için
-[../../docs/tr/quickstart.md](../../docs/tr/quickstart.md) ve
-[../../gemstone_ws/README.md](../../gemstone_ws/README.md) içindeki
-"Önerilen test sırası" bölümüne bakın.
+[../../docs/tr/quickstart.md](../../docs/tr/quickstart.md) içindeki
+"Kademeli Test" bölümüne bakın.
