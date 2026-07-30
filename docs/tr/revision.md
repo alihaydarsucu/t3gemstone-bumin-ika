@@ -19,3 +19,21 @@
   `gemstone_imu` (C++) getirildi
 - README, BLUEPRINT ve tüm `docs/tr/*` sayfaları gerçek implementasyonu
   yansıtacak şekilde güncellendi
+
+## 2026-07-30
+- mimari karar değişti: motor kontrolü artık UART ile harici sürücü kart
+  yerine, Gemstone'un GPIO'larından (libgpiod) **doğrudan** Harezmi
+  robotunun motor+enkoder kartını (MX1508 H-bridge) sürüyor -- kart
+  üzerindeki Deneyap sökülüp yerine Gemstone geçti; güç harici 2S pilden,
+  lojik Gemstone'un 3.3V+GND'sinden besleniyor
+- `gemstone_motor_driver` yeniden yazıldı: UART/`protocol.py` kaldırıldı,
+  yerine `gpio_motor.py` (H-bridge yön kontrolü) ve `quadrature_encoder.py`
+  (kadratür enkoder tik sayımı) eklendi; `differential_drive.py`'ye ters
+  kinematik (`wheel_speeds_to_twist`) ve odometri entegrasyonu
+  (`OdometryIntegrator`) eklendi, `/wheel_odom` yayınlanıyor
+- yeni paket: `gemstone_ultrasonic` (HC-SR04 benzeri sensör, GPIO/libgpiod,
+  `sensor_msgs/Range` yayınlıyor)
+- `gemstone_bringup/launch/bringup.launch.py`'ye `enable_ultrasonic`
+  argümanı eklendi
+- Harezmi-Deneyap resmi pin haritası PDF'i incelendi, multimetre
+  ölçümleriyle doğrulandı; tam eşleme `hardware/README.md`'de

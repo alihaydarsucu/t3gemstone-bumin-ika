@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'gemstone_motor_driver'
+package_name = 'gemstone_ultrasonic'
 
 setup(
     name=package_name,
@@ -15,14 +15,14 @@ setup(
     zip_safe=True,
     maintainer='gemstone',
     maintainer_email='gemstone@todo.todo',
-    description='Diferansiyel surus GPIO (libgpiod) motor surucu + enkoder odometrisi node.',
+    description='HC-SR04 benzeri ultrasonik mesafe sensoru (libgpiod) node.',
     license='Apache-2.0',
     extras_require={
         'test': ['pytest'],
     },
     entry_points={
         'console_scripts': [
-            'motor_driver_node = gemstone_motor_driver.motor_driver_node:main',
+            'ultrasonic_node = gemstone_ultrasonic.ultrasonic_node:main',
         ],
     },
 )

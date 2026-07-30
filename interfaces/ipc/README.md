@@ -12,7 +12,6 @@ Bu klasör, Linux tarafında çalışan paketler arasında hafif veri köprüsü
 
 Şu an tüm paketler arası iletişim doğrudan ROS 2 topic'leri üzerinden
 yapılıyor (bkz. `interfaces/msg/README.md`); ek bir IPC katmanına ihtiyaç
-duyulmadı. Tek istisna: `gemstone_motor_driver` ile harici motor sürücü kart
-arasındaki UART çerçeve protokolü (`gemstone_motor_driver/protocol.py`) —
-bu ROS dışı, donanıma özel bir sözleşme ve henüz gerçek kartla
-doğrulanmadı.
+duyulmadı. `gemstone_motor_driver` ve `gemstone_ultrasonic`, Harezmi
+kartıyla ROS dışı bir protokol yerine doğrudan GPIO (libgpiod) üzerinden
+konuşuyor -- bu da bir IPC sözleşmesi değil, donanım sürücü katmanı.

@@ -1,0 +1,23 @@
+ultrasonic_node:
+  ros__parameters:
+    # YER TUTUCU: karta baglanip `gpiodetect` ile gercek chip adini bulun.
+    # gemstone_motor_driver ile AYNI chip olmali (ikisi de ayni GPIO
+    # kontrolcusunu kullaniyor).
+    gpio_chip: ''
+    publish_rate_hz: 10.0
+    min_range: 0.02   # HC-SR04 tipik minimum menzil (m)
+    max_range: 4.0    # HC-SR04 tipik maksimum menzil (m)
+    field_of_view: 0.26   # ~15 derece, HC-SR04 tipik koni acisi (radyan)
+
+    # Ultrasonik 1 -- Harezmi/Deneyap pin haritasinda trig=D0(A13), echo=D1(A12)
+    ultrasonic1_trig_line: -1
+    ultrasonic1_echo_line: -1
+    ultrasonic1_frame_id: ultrasonic1_link
+    ultrasonic1_topic: ultrasonic1/range
+
+    # Ultrasonik 2 -- Harezmi/Deneyap pin haritasinda trig=D7, echo=D8
+    # (opsiyonel; kullanmiyorsaniz -1 birakin, node otomatik atlar)
+    ultrasonic2_trig_line: -1
+    ultrasonic2_echo_line: -1
+    ultrasonic2_frame_id: ultrasonic2_link
+    ultrasonic2_topic: ultrasonic2/range

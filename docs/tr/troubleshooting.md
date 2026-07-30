@@ -23,15 +23,31 @@
 
 ## Motor tepki vermiyor
 
-- `/dev/ttyS0` (UART-WKUP0) izinleri ve fiziksel bağlantı doğru mu
-- `gemstone_motor_driver/protocol.py`'deki çerçeve formatı, gerçek sürücü
-  kartın beklediği protokolle eşleşiyor mu (bu hâlâ bir yer tutucu, bkz.
-  `gemstone_ws/README.md` "Bilinen yer tutucular")
+- `gpio_chip` parametresi doğru mu (`gpiodetect` ile kontrol edin) — boşsa
+  node hiç açılmaz (bilerek fail-fast)
+- `motorN_in1_line`/`motorN_in2_line` gerçek line offsetleriyle eşleşiyor
+  mu (`gpioinfo <chip>` ile kontrol edin) — varsayılan `-1` ise node açılmaz
+- Harezmi kartındaki Deneyap gerçekten söküldü mü, Gemstone'un GPIO'ları
+  doğru header pinlerine (D12/D13/D14/D15'in karşılığı) bağlandı mı
 - `/cmd_vel` `cmd_vel_timeout` (varsayılan 0.5 sn) içinde geliyor mu — aksi
   halde node güvenlik gereği otomatik durur
-- `ttyS3` kullanıyorsanız PWM overlay ile TX hattı çakışması olabilir, `ttyS6`
-  kullanıyorsanız Bluetooth devre dışı kalır (bkz. T3 Gemstone seri port
-  dokümantasyonu)
+- motor doğru yönde dönmüyorsa `motorN_invert` parametresini ters çevirin
+
+## Enkoder tik saymıyor / yanlış yönde sayıyor
+
+- `encoderN_a_line`/`encoderN_b_line` doğru mu (Kanal A interrupt-uyumlu
+  bir pine bağlanmalı)
+- Kanal A/B kabloları yer değiştirmiş olabilir — sayım hiç olmuyorsa Kanal A
+  bağlantısını kontrol edin
+- yön ters geliyorsa (motoru elle ileri çevirince tik sayacı azalıyorsa)
+  `encoderN_invert` parametresini `true` yapın
+
+## Ultrasonik sensör hep `inf` veya yanlış mesafe veriyor
+
+- `gpio_chip`, `ultrasonicN_trig_line`/`echo_line` doğru mu
+- trig ve echo kabloları yer değiştirmiş olabilir
+- sensörün önünde gerçekten bir engel var mı, `min_range`/`max_range`
+  dışında bir mesafe mi ölçülüyor
 
 ## IMU veri vermiyor
 

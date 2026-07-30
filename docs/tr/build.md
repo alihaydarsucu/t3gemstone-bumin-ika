@@ -27,13 +27,13 @@ ROS 2 kurulu bir sistemde tipik akış:
 - `ros-humble-imu-filter-madgwick`
 - `ros-humble-robot-state-publisher`, `ros-humble-joint-state-publisher`, `ros-humble-xacro`
 - `ros-humble-diagnostic-updater`
-- `python3-serial` (motor UART), `python3-opencv`
+- `python3-libgpiod` (motor + enkoder + ultrasonik GPIO), `python3-opencv`
 - `/dev/spidev0.3` erişimi (dahili IMU)
-- `/dev/ttyS0` erişimi (motor UART)
+- GPIO erişimi (`gpiodetect`/`gpioinfo` ile chip adı ve line offsetlerini
+  bulun) — motor, enkoder, ultrasonik
 - `/dev/ttyUSB0` erişimi (RPLidar)
 
-Tam kurulum komutu için [../../gemstone_ws/README.md](../../gemstone_ws/README.md)'ye
-bakın. Varsayılan A1M8 baudrate değeri `115200` olarak ayarlanır.
+Varsayılan A1M8 baudrate değeri `115200` olarak ayarlanır.
 
 ## Container Yolu
 
@@ -41,7 +41,7 @@ Bu repo içinde bir `Dockerfile` bulunur.
 Bu yol, ROS 2 Humble kurulumu olmayan ya da yerel binary paketleri için uygun olmayan sistemlerde daha güvenli bir test ortamı sağlar. Dockerfile, apt'ta olmayan
 `rf2o_laser_odometry` ve `sllidar_ros2`'yi build sırasında otomatik clone'lar.
 
-Not: gerçek donanım erişimi (SPI/UART/CSI) sadece kartın kendisinde mümkündür;
+Not: gerçek donanım erişimi (SPI/GPIO/CSI) sadece kartın kendisinde mümkündür;
 container yalnızca derleme/kod testinde yardımcı olur, donanımsız node'ları
 (kinematik, protokol, lidar karar mantığı gibi) test etmek için de kullanılabilir.
 

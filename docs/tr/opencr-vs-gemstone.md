@@ -60,12 +60,14 @@ Bu yüzden önerilen yapı:
 ## Gerçekleşen Proje Yapısı
 
 Aşağıdaki taslak, aşağıdaki gerçek paket bölünmesine evrildi (bkz.
-`BLUEPRINT.md` ve `gemstone_ws/README.md`):
+`BLUEPRINT.md`):
 
 ### Çekirdek Paketler
 
 - `gemstone_imu` — ICM-20948 SPI sürücüsü
-- `gemstone_motor_driver` — diferansiyel sürüş + UART motor sürücüsü
+- `gemstone_motor_driver` — diferansiyel sürüş + GPIO (libgpiod) motor
+  sürücü + kadratür enkoder odometrisi
+- `gemstone_ultrasonic` — HC-SR04 benzeri ultrasonik mesafe sensörü (GPIO)
 - `gemstone_camera` / `gemstone_image_proc` — CSI kamera + görüntü işleme
 - `gemstone_lidar_bringup` — sllidar_ros2 + rf2o + slam_toolbox + Nav2
 - `gemstone_obstacle_avoidance` — lidar tabanlı güvenlik/karar node'u
@@ -79,7 +81,9 @@ tiplerini kullanıyor (bkz. `interfaces/msg/README.md`).
 - Gemstone dahili sensörleri (ICM-20948 IMU)
 - USB üzerinden `A1M8` RPLidar (`sllidar_ros2`)
 - CSI kamera sürücüsü (`v4l2_camera`)
-- harici motor sürücüsü (UART)
+- Harezmi motor+enkoder kartı, Gemstone GPIO'larıyla doğrudan sürülüyor
+  (Deneyap sökülüp yerine geçildi)
+- ultrasonik mesafe sensörü (GPIO)
 - sistem sağlık bilgileri (`diagnostic_updater`)
 
 ### Gerçek Topic'ler
@@ -88,7 +92,8 @@ tiplerini kullanıyor (bkz. `interfaces/msg/README.md`).
 kullanılıyor (teleop/Nav2/rqt gibi hazır araçlarla uyumluluk için):
 
 - `/imu/data_raw`, `/imu/data`
-- `/scan`, `/odom_rf2o`
+- `/scan`, `/odom_rf2o`, `/wheel_odom`
+- `/ultrasonic1/range`, `/ultrasonic2/range`
 - `/camera/image_raw`, `/camera/image_processed`
 - `/cmd_vel`, `/cmd_vel_nav`
 - `/diagnostics`

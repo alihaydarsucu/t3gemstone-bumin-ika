@@ -28,9 +28,9 @@ Bu proje için bringup şu adımları kapsar:
 ## Önerilen Sıra
 
 Hepsini birden açmadan önce her katmanı tek tek doğrulamak için
-`gemstone_ws/README.md` içindeki "Önerilen test sırası" bölümüne bakın:
-önce IMU, sonra motor sürücü (teker havada/blok üzerinde), sonra kamera,
-sonra lidar, sonra engelden kaçınma, sonra haritalama, en son Nav2.
+[quickstart.md](quickstart.md) içindeki "Kademeli Test" bölümüne bakın:
+önce IMU, sonra motor sürücü (teker havada/blok üzerinde), sonra ultrasonik,
+sonra kamera, sonra lidar, sonra engelden kaçınma, sonra haritalama, en son Nav2.
 
 ## Hedef Çıktı
 

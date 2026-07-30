@@ -11,14 +11,17 @@
 Bu repo, T3 Gemstone O1 kartı üzerinde **Linux-first bir ROS 2 bringup sistemi** kurar.
 Tek kart tüm görevleri üstlenir: motor/teker sürme, dahili IMU okuma, lidar tabanlı
 karar/harita/otonomi, kamera + görüntü işleme. Ayrı bir mikrodenetleyici (Deneyap
-vb.) yok; motor sürücüsü harici bir sürücü karta UART üzerinden bağlanır.
+vb.) yok; Harezmi robotunun motor+enkoder kartı üzerindeki Deneyap sökülüp
+Gemstone'un GPIO'ları doğrudan bağlanır (libgpiod).
 
 Bringup hattı şunları yapar:
 
 - `ICM-20948` dahili IMU'yu SPI (`/dev/spidev0.3`) üzerinden okuyup `imu/data_raw`
   yayınlar (T3 Foundation'ın resmi C sürücü kütüphanesiyle)
-- `/cmd_vel`'i diferansiyel sürüş kinematiğiyle sol/sağ teker hızına çevirip UART
-  üzerinden harici motor sürücü karta yazar
+- `/cmd_vel`'i diferansiyel sürüş kinematiğiyle sol/sağ teker yönüne çevirip
+  Gemstone GPIO'ları (libgpiod) üzerinden Harezmi kartındaki MX1508 H-bridge'i
+  sürer, kadratür enkoderlerden `wheel_odom` yayınlar
+- HC-SR04 benzeri ultrasonik sensör(ler)i GPIO üzerinden okuyup `Range` yayınlar
 - CSI kamerayı (`v4l2_camera`) açıp `camera/image_raw` yayınlar
 - `A1M8` RPLidar'ı Slamtec'in resmi `sllidar_ros2` paketiyle bağlar
 - lidar verisiyle gerçek zamanlı engelden kaçınma, `slam_toolbox` ile haritalama
@@ -50,7 +53,8 @@ Bringup hattı şunları yapar:
 - `docs/` - proje dokümantasyonu
 - `src/` - ROS 2 paketleri
   - `gemstone_imu` - ICM-20948 SPI sürücüsü (C++)
-  - `gemstone_motor_driver` - diferansiyel sürüş + UART motor sürücüsü (Python)
+  - `gemstone_motor_driver` - diferansiyel sürüş + GPIO (libgpiod) motor sürücü + enkoder odometrisi (Python)
+  - `gemstone_ultrasonic` - HC-SR04 benzeri ultrasonik mesafe sensörü (GPIO/libgpiod)
   - `gemstone_camera` - CSI kamera launch (v4l2_camera)
   - `gemstone_image_proc` - görüntü işleme iskeleti
   - `gemstone_obstacle_avoidance` - lidar tabanlı güvenlik/karar node'u
@@ -69,7 +73,8 @@ Bringup hattı şunları yapar:
 |---|---:|---|
 | Linux bringup | Calisiyor (henuz saha testi yok) | Tek launch, tum katmanlar ayri ac/kapa argumanli |
 | IMU (ICM-20948) | Kod hazir | T3 Foundation C kutuphanesi + ROS 2 node |
-| Motor surucu | Kod hazir, protokol yer tutucu | UART cercevesi gercek surucu kartla dogrulanmadi |
+| Motor surucu | Kod hazir, yon kontrolu | GPIO pin/line numaralari + PWM/hiz kontrolu henuz donanimla dogrulanmadi |
+| Ultrasonik sensor | Kod hazir | GPIO pin numaralari henuz donanimla dogrulanmadi |
 | Kamera (CSI) | Kod hazir | v4l2_camera ile |
 | Goruntu isleme | Iskelet | Gercek CV gorevi henuz yok |
 | RPLidar A1M8 | Kod hazir | sllidar_ros2 ile |

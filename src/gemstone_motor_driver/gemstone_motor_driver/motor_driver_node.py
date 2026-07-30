@@ -1,25 +1,45 @@
 """gemstone_motor_driver: /cmd_vel (geometry_msgs/Twist) komutunu
-diferansiyel surus kinematigiyle sol/sag teker hizina cevirip UART
-uzerinden harici motor surucu karta gonderen node.
+diferansiyel surus kinematigiyle sol/sag teker yonune cevirip Gemstone'un
+GPIO'lari uzerinden (libgpiod) Harezmi kartindaki MX1508 H-bridge'i suren,
+ve kadratur enkoderlerden tekerlek odometrisi (nav_msgs/Odometry) ureten
+node.
+
+Mimari notu: Bu node artik harici bir surucu karta UART ile KOMUT
+GONDERMIYOR -- Gemstone, Harezmi kartindaki Deneyap'in yerini alarak
+motorlari VE enkoderleri DOGRUDAN GPIO uzerinden suruyor/okuyor (bkz.
+BLUEPRINT.md, mimari karar guncellemesi).
 
 Guvenlik: /cmd_vel belirli bir sure (cmd_vel_timeout) icinde gelmezse
-node otomatik olarak DUR komutu gonderir (watchdog). Gonderim sabit bir
-control_rate_hz frekansinda yapilir; cmd_vel callback'i sadece son
-komutu saklar, seri porta tek yerden (zamanlayici) yazilir.
+motorlar otomatik durur (watchdog), tipki eski UART implementasyonunda
+oldugu gibi.
+
+TF notu: Bu node varsayilan olarak SADECE /wheel_odom topic'ini yayinlar,
+odom->base_link TF'ini YAYINLAMAZ (publish_tf parametresi False) --
+cunku bu TF'i su an rf2o_laser_odometry sagliyor (publish_tf:true). Ikisi
+birden TF yayinlarsa cakisir (TF_REPEATED_DATA). Ileride robot_localization
+(EKF) ile bu iki odometri kaynagini (teker + lazer) birlestirmek en dogru
+yontem olacak.
 """
 
-import serial
+import gpiod
 
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
+from rclpy.time import Time
+from geometry_msgs.msg import Twist, TransformStamped
+from nav_msgs.msg import Odometry
+from tf2_ros import TransformBroadcaster
+from tf_transformations import quaternion_from_euler
 
 from gemstone_motor_driver.differential_drive import (
     twist_to_wheel_speeds,
     wheel_speed_to_percent,
+    wheel_speeds_to_twist,
+    ticks_to_distance,
+    OdometryIntegrator,
 )
-from gemstone_motor_driver.protocol import encode_speed_command, encode_stop_command
+from gemstone_motor_driver.gpio_motor import GpioHBridgeMotor
+from gemstone_motor_driver.quadrature_encoder import QuadratureEncoder
 
 
 class MotorDriverNode(Node):
@@ -27,94 +47,172 @@ class MotorDriverNode(Node):
     def __init__(self):
         super().__init__('motor_driver_node')
 
-        self.declare_parameter('serial_port', '/dev/ttyS0')
-        self.declare_parameter('baud_rate', 115200)
+        self.declare_parameter('gpio_chip', '')
+        self.declare_parameter('motor1_in1_line', -1)
+        self.declare_parameter('motor1_in2_line', -1)
+        self.declare_parameter('motor2_in1_line', -1)
+        self.declare_parameter('motor2_in2_line', -1)
+        self.declare_parameter('motor1_invert', False)
+        self.declare_parameter('motor2_invert', False)
+
+        self.declare_parameter('encoder1_a_line', -1)
+        self.declare_parameter('encoder1_b_line', -1)
+        self.declare_parameter('encoder2_a_line', -1)
+        self.declare_parameter('encoder2_b_line', -1)
+        self.declare_parameter('encoder1_invert', False)
+        self.declare_parameter('encoder2_invert', False)
+        # YER TUTUCU: motorun/enkoderin gercek cozunurlugu bilinmiyor.
+        # Tekerlegi elle tam bir tur cevirip tik sayisini sayarak bulun.
+        self.declare_parameter('encoder_ticks_per_revolution', 20.0)
+        self.declare_parameter('wheel_radius', 0.033)
+
         self.declare_parameter('wheel_separation', 0.30)
         self.declare_parameter('max_wheel_speed', 1.0)
         self.declare_parameter('cmd_vel_timeout', 0.5)
         self.declare_parameter('control_rate_hz', 20.0)
+        self.declare_parameter('odom_frame_id', 'odom')
+        self.declare_parameter('base_frame_id', 'base_link')
+        self.declare_parameter('publish_tf', False)
 
         self.wheel_separation = self.get_parameter('wheel_separation').value
         self.max_wheel_speed = self.get_parameter('max_wheel_speed').value
         self.cmd_vel_timeout = self.get_parameter('cmd_vel_timeout').value
+        self.ticks_per_rev = self.get_parameter('encoder_ticks_per_revolution').value
+        self.wheel_radius = self.get_parameter('wheel_radius').value
+        self.odom_frame_id = self.get_parameter('odom_frame_id').value
+        self.base_frame_id = self.get_parameter('base_frame_id').value
+        self.publish_tf = self.get_parameter('publish_tf').value
 
-        port = self.get_parameter('serial_port').value
-        baud = self.get_parameter('baud_rate').value
+        gpio_chip_name = self.get_parameter('gpio_chip').value
+        if not gpio_chip_name:
+            self.get_logger().fatal(
+                "'gpio_chip' parametresi bos -- once karti kontrol edip "
+                '(gpiodetect) dogru chip adini (ornek: gpiochip0) '
+                'params dosyasina yazin.')
+            raise RuntimeError('gpio_chip parametresi yapilandirilmadi')
 
         try:
-            self.ser = serial.Serial(port, baud, timeout=0.05)
-        except serial.SerialException as e:
-            self.get_logger().fatal(f'Motor surucu seri port acilamadi ({port}): {e}')
+            self.chip = gpiod.Chip(gpio_chip_name)
+        except OSError as e:
+            self.get_logger().fatal(f"GPIO chip acilamadi ({gpio_chip_name}): {e}")
             raise
+
+        self.motor1 = GpioHBridgeMotor(
+            self.chip,
+            self.get_parameter('motor1_in1_line').value,
+            self.get_parameter('motor1_in2_line').value,
+            invert=self.get_parameter('motor1_invert').value)
+        self.motor2 = GpioHBridgeMotor(
+            self.chip,
+            self.get_parameter('motor2_in1_line').value,
+            self.get_parameter('motor2_in2_line').value,
+            invert=self.get_parameter('motor2_invert').value)
+
+        self.encoder1 = QuadratureEncoder(
+            self.chip,
+            self.get_parameter('encoder1_a_line').value,
+            self.get_parameter('encoder1_b_line').value,
+            invert=self.get_parameter('encoder1_invert').value)
+        self.encoder2 = QuadratureEncoder(
+            self.chip,
+            self.get_parameter('encoder2_a_line').value,
+            self.get_parameter('encoder2_b_line').value,
+            invert=self.get_parameter('encoder2_invert').value)
 
         self.last_cmd = Twist()
         self.last_cmd_time = self.get_clock().now()
-        self.consecutive_write_failures = 0
+        self.odom_integrator = OdometryIntegrator()
+        self.last_odom_time = self.get_clock().now()
 
         self.create_subscription(Twist, 'cmd_vel', self.cmd_vel_cb, 10)
-        self.diag_pub = self.create_publisher(DiagnosticArray, '/diagnostics', 10)
+        self.odom_pub = self.create_publisher(Odometry, 'wheel_odom', 10)
+        self.tf_broadcaster = TransformBroadcaster(self) if self.publish_tf else None
 
         control_rate = self.get_parameter('control_rate_hz').value
         self.create_timer(1.0 / control_rate, self.control_loop)
 
         self.get_logger().info(
-            f'Motor surucu basladi: port={port} baud={baud} '
-            f'wheel_separation={self.wheel_separation} m max_wheel_speed={self.max_wheel_speed} m/s')
+            f'Motor surucu basladi (GPIO/libgpiod): chip={gpio_chip_name} '
+            f'wheel_separation={self.wheel_separation} m '
+            f'wheel_radius={self.wheel_radius} m '
+            f'ticks_per_rev={self.ticks_per_rev}')
 
     def cmd_vel_cb(self, msg: Twist):
         self.last_cmd = msg
         self.last_cmd_time = self.get_clock().now()
 
     def control_loop(self):
-        elapsed = (self.get_clock().now() - self.last_cmd_time).nanoseconds / 1e9
+        now = self.get_clock().now()
+        elapsed = (now - self.last_cmd_time).nanoseconds / 1e9
 
         if elapsed > self.cmd_vel_timeout:
-            frame = encode_stop_command()
-            if elapsed < self.cmd_vel_timeout + (1.0 / 20.0):
-                # Sadece esigi yeni astigimizda bir kere uyar, spam yapma.
-                self.get_logger().warn(
-                    f'/cmd_vel {self.cmd_vel_timeout:.2f}s icinde gelmedi, motorlar durduruluyor.')
+            left_pct, right_pct = 0.0, 0.0
         else:
             speeds = twist_to_wheel_speeds(
                 self.last_cmd.linear.x, self.last_cmd.angular.z, self.wheel_separation)
             left_pct = wheel_speed_to_percent(speeds.left_mps, self.max_wheel_speed)
             right_pct = wheel_speed_to_percent(speeds.right_mps, self.max_wheel_speed)
-            frame = encode_speed_command(left_pct, right_pct)
 
-        self._write_frame(frame)
+        self.motor1.drive(left_pct)
+        self.motor2.drive(right_pct)
 
-    def _write_frame(self, frame: bytes):
-        try:
-            self.ser.write(frame)
-            self.consecutive_write_failures = 0
-        except serial.SerialException as e:
-            self.consecutive_write_failures += 1
-            self.get_logger().warn(f'Motor surucuye yazma hatasi: {e}', throttle_duration_sec=2.0)
-        self._publish_diagnostics()
+        self._update_odometry(now)
 
-    def _publish_diagnostics(self):
-        status = DiagnosticStatus()
-        status.name = 'gemstone_motor_driver: uart_link'
-        status.hardware_id = self.get_parameter('serial_port').value
-        if self.consecutive_write_failures == 0:
-            status.level = DiagnosticStatus.OK
-            status.message = 'Seri port yazimi calisiyor'
-        elif self.consecutive_write_failures < 10:
-            status.level = DiagnosticStatus.WARN
-            status.message = 'Ardisik yazma hatasi'
-        else:
-            status.level = DiagnosticStatus.ERROR
-            status.message = 'Seri port yazimi surekli basarisiz'
+    def _update_odometry(self, now: Time):
+        dt = (now - self.last_odom_time).nanoseconds / 1e9
+        self.last_odom_time = now
+        if dt <= 0.0:
+            return
 
-        array = DiagnosticArray()
-        array.header.stamp = self.get_clock().now().to_msg()
-        array.status.append(status)
-        self.diag_pub.publish(array)
+        left_ticks = self.encoder1.read_and_reset_ticks()
+        right_ticks = self.encoder2.read_and_reset_ticks()
+
+        left_distance = ticks_to_distance(left_ticks, self.ticks_per_rev, self.wheel_radius)
+        right_distance = ticks_to_distance(right_ticks, self.ticks_per_rev, self.wheel_radius)
+
+        left_mps = left_distance / dt
+        right_mps = right_distance / dt
+        twist = wheel_speeds_to_twist(left_mps, right_mps, self.wheel_separation)
+        pose = self.odom_integrator.update(twist.linear_x, twist.angular_z, dt)
+
+        stamp = now.to_msg()
+        quat = quaternion_from_euler(0.0, 0.0, pose.theta)
+
+        odom = Odometry()
+        odom.header.stamp = stamp
+        odom.header.frame_id = self.odom_frame_id
+        odom.child_frame_id = self.base_frame_id
+        odom.pose.pose.position.x = pose.x
+        odom.pose.pose.position.y = pose.y
+        odom.pose.pose.orientation.x = quat[0]
+        odom.pose.pose.orientation.y = quat[1]
+        odom.pose.pose.orientation.z = quat[2]
+        odom.pose.pose.orientation.w = quat[3]
+        odom.twist.twist.linear.x = twist.linear_x
+        odom.twist.twist.angular.z = twist.angular_z
+        self.odom_pub.publish(odom)
+
+        if self.tf_broadcaster is not None:
+            tf_msg = TransformStamped()
+            tf_msg.header.stamp = stamp
+            tf_msg.header.frame_id = self.odom_frame_id
+            tf_msg.child_frame_id = self.base_frame_id
+            tf_msg.transform.translation.x = pose.x
+            tf_msg.transform.translation.y = pose.y
+            tf_msg.transform.rotation.x = quat[0]
+            tf_msg.transform.rotation.y = quat[1]
+            tf_msg.transform.rotation.z = quat[2]
+            tf_msg.transform.rotation.w = quat[3]
+            self.tf_broadcaster.sendTransform(tf_msg)
 
     def destroy_node(self):
         try:
-            self._write_frame(encode_stop_command())
-            self.ser.close()
+            self.motor1.stop()
+            self.motor2.stop()
+            self.motor1.release()
+            self.motor2.release()
+            self.encoder1.stop()
+            self.encoder2.stop()
         except Exception:
             pass
         super().destroy_node()

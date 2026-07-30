@@ -16,13 +16,24 @@ Bu sürüm için hayır. Ana hedef Linux üzerinde çalışan ROS 2 node'larıd�
 
 Bu proje için hedef Linux üzerinde çalışan ROS 2 node'larıyla topic üretmektir.
 
-## Motor neden GPIO yerine UART ile sürülüyor?
+## Motorlar GPIO ile mi, UART ile mi sürülüyor?
 
-İlk taslakta (`BLUEPRINT.md`) motorların doğrudan GPIO ile sürülmesi
-düşünülmüştü. Ekip, motorların harici bir sürücü karta bağlı olacağına ve bu
-karta Linux'tan UART üzerinden komut gönderileceğine karar verdi
-(`gemstone_motor_driver` paketi). GPIO'dan doğrudan sürme bu proje için
-kullanılmıyor.
+GPIO (libgpiod), doğrudan. Projenin ilk taslağında UART ile harici bir
+sürücü karta komut gönderme fikri değerlendirilmişti, ama gerçek donanım
+(Harezmi robotunun motor+enkoder kartı, üzerinde bir Deneyap Kart +
+MX1508 H-bridge) incelenince karar değişti: Deneyap sökülüp yerine
+Gemstone'un GPIO'ları doğrudan bağlanıyor, motor yönü ve kadratür
+enkoderler `gemstone_motor_driver` paketinden libgpiod ile
+sürülüyor/okunuyor. Güç hâlâ harici bir 2S pilden geliyor; Gemstone sadece
+kartın lojik tarafını (3.3V + GND) besliyor.
+
+## Motorlarda değişken hız (PWM) kontrolü var mı?
+
+Henüz yok — `gemstone_motor_driver` şu an sadece yön kontrolü yapıyor
+(bang-bang: tam hız ileri/geri/dur). libgpiod salt dijital GPIO'dur, PWM
+üretmez; gerçek hız kontrolü için Gemstone'un donanımsal PWM çıkışının
+hangi fiziksel pinlerde olduğu netleşmeli (bkz. `BLUEPRINT.md` yol
+haritası v0.4).
 
 ## Araç Ackermann (RC araba) tipi mi, diferansiyel sürüş mü?
 
