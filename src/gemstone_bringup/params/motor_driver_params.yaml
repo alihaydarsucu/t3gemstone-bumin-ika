@@ -1,30 +1,32 @@
 motor_driver_node:
   ros__parameters:
-    # YER TUTUCU: karta baglanip `gpiodetect` ile gercek chip adini,
-    # `gpioinfo` ile gercek line offsetlerini bulup asagidakileri
-    # doldurun. Doldurulmadan (gpio_chip bos / line'lar -1) node acilmaz.
-    gpio_chip: ''
+    # `gpiodetect`/`gpioinfo` ile dogrulandi (2026-07-30): GPIO2/3 (I2C),
+    # GPIO7/8/9/10/11 (SPI0 -- IMU spidev0.3 bunu kullaniyor),
+    # GPIO4/14/15/17 (UART-MAIN1/6 + PWM overlay) KULLANILMADI. Fiziksel
+    # pin numaralari standart RPi 40-pin header varsayimiyla, kartin
+    # "Pin 1" isaretiyle mutlaka gorsel olarak dogrulayin.
+    gpio_chip: gpiochip3
 
     # Motor 1 (sol) -- Harezmi/Deneyap pin haritasinda D12/D13 idi
-    motor1_in1_line: -1
-    motor1_in2_line: -1
+    motor1_in1_line: 7   # GPIO16, fiziksel pin 36
+    motor1_in2_line: 8   # GPIO17, fiziksel pin 11
     motor1_invert: false
 
     # Motor 2 (sag) -- Harezmi/Deneyap pin haritasinda D14/D15 idi
-    motor2_in1_line: -1
-    motor2_in2_line: -1
+    motor2_in1_line: 16  # GPIO12, fiziksel pin 32
+    motor2_in2_line: 18  # GPIO13, fiziksel pin 33
     motor2_invert: false
 
     # Enkoder 1 (motor 1 ile ayni taraf) -- Deneyap'ta D2 (Kanal A,
     # interrupt) / D9 (Kanal B) idi
-    encoder1_a_line: -1
-    encoder1_b_line: -1
+    encoder1_a_line: 9   # GPIO21, fiziksel pin 40
+    encoder1_b_line: 10  # GPIO20, fiziksel pin 38
     encoder1_invert: false
 
     # Enkoder 2 (motor 2 ile ayni taraf) -- Deneyap'ta D3 (Kanal A,
     # interrupt) / A7-D16 (Kanal B) idi
-    encoder2_a_line: -1
-    encoder2_b_line: -1
+    encoder2_a_line: 11  # GPIO18, fiziksel pin 12
+    encoder2_b_line: 12  # GPIO19, fiziksel pin 35
     encoder2_invert: false
 
     # YER TUTUCU: tekerlegi elle tam bir tur cevirip tik sayisini sayarak
