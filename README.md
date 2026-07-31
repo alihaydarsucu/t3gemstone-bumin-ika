@@ -23,6 +23,13 @@
 
 Bu repo ana uygulama kodunu ve kısa çalışma notlarını içerir. Ayrıntılı dokümantasyon için doğrudan kaynak dosyalara geçin:
 
+<p align="center">
+  <img src="assets/under-construction.avif" alt="Hazırlık aşamasında" width="30%" />
+</p>
+<p align="center">
+  <small>Bu alana saha doğrulama görselleri, örnek akış ekranları ve kısa kullanım notları eklenecek.</small>
+</p>
+
 - [Türkçe dokümanlar](https://github.com/alitalhq/t3gemstone-bumin-ika-docs/tree/main/docs/tr)
 - [English docs](https://github.com/alitalhq/t3gemstone-bumin-ika-docs/tree/main/docs/en)
 - [Docs repo README](https://github.com/alitalhq/t3gemstone-bumin-ika-docs/blob/main/README.md)
