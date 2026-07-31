@@ -1,14 +1,20 @@
 # T3 Gemstone Linux ROS Bringup Documentation Index
 
-- /docs/tr/introduction.md
-- /docs/tr/architecture.md
-- /docs/tr/drivers.md
-- /docs/tr/camera.md
-- /docs/tr/bringup.md
-- /docs/tr/roadmap.md
-- /docs/tr/faq.md
-- /docs/tr/troubleshooting.md
-- /docs/tr/revision.md
-- /docs/tr/opencr-vs-gemstone.md
-- /docs/tr/build.md
-- /docs/tr/quickstart.md
+- https://docs.t3gemstone.org/tr/introduction
+- https://docs.t3gemstone.org/tr/quickstart
+- https://docs.t3gemstone.org/tr/build
+- https://docs.t3gemstone.org/tr/hardware
+- https://docs.t3gemstone.org/tr/architecture
+- https://docs.t3gemstone.org/tr/bringup
+- https://docs.t3gemstone.org/tr/drivers
+- https://docs.t3gemstone.org/tr/troubleshooting
+- https://docs.t3gemstone.org/tr/faq
+- https://docs.t3gemstone.org/en/introduction
+- https://docs.t3gemstone.org/en/quickstart
+- https://docs.t3gemstone.org/en/build
+- https://docs.t3gemstone.org/en/hardware
+- https://docs.t3gemstone.org/en/architecture
+- https://docs.t3gemstone.org/en/bringup
+- https://docs.t3gemstone.org/en/drivers
+- https://docs.t3gemstone.org/en/troubleshooting
+- https://docs.t3gemstone.org/en/faq
