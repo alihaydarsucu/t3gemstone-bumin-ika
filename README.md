@@ -17,7 +17,7 @@
 
 > **[TR]** T3 Gemstone O1 üzerinde çalışan, sensörler ve motor akışlarını tek bir ROS 2 bringup hattında toplayan diferansiyel sürüşlü İKA projesi.
 >
-> **[EN]** A differential-drive IKA project running on the T3 Gemstone O1, bringing sensors and motor workflows together in a single ROS 2 bringup flow.
+> **[EN]** A differential-drive UGV project running on the T3 Gemstone O1, bringing sensors and motor workflows together in a single ROS 2 bringup flow.
 
 ## Kısa Tanım
 
