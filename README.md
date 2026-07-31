@@ -10,8 +10,9 @@
 
 Bu repo ana uygulama kodunu ve kısa çalışma notlarını içerir. Ayrıntılı dokümantasyon artık ayrı bir docs reposunda tutulur:
 
-- [Türkçe dokümanlar](https://docs.t3gemstone.org/tr/introduction)
-- [English docs](https://docs.t3gemstone.org/en/introduction)
+- [Türkçe dokümanlar](https://github.com/alitalhq/t3gemstone-bumin-ika-docs/tree/main/docs/tr/introduction.mdx)
+- [English docs](https://github.com/alitalhq/t3gemstone-bumin-ika-docs/tree/main/docs/en/introduction.mdx)
+- [Docs repo README](https://github.com/alitalhq/t3gemstone-bumin-ika-docs/blob/main/README.md)
 
 Tek kart yaklaşımı kullanılır. IMU, motor sürücü, ultrasonik sensörler, lidar ve kamera Linux tarafındaki ROS 2 node'ları ile çalışır.
 
@@ -32,5 +33,5 @@ Tek kart yaklaşımı kullanılır. IMU, motor sürücü, ultrasonik sensörler,
 
 ## Devam
 
-- [Dokümantasyon Girişi](https://docs.t3gemstone.org/tr/introduction)
-- [English Documentation](https://docs.t3gemstone.org/en/introduction)
+- [Dokümantasyon Girişi](https://github.com/alitalhq/t3gemstone-bumin-ika-docs/tree/main/docs/tr/introduction.mdx)
+- [English Documentation](https://github.com/alitalhq/t3gemstone-bumin-ika-docs/tree/main/docs/en/introduction.mdx)
