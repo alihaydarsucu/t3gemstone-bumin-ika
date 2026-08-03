@@ -69,6 +69,8 @@ dogrudan baglaniyor (guc: harici 2S pil motoru besliyor, Gemstone sadece
 
 ### 3. Node Layer
 - `gemstone_image_proc`: görüntü işleme iskeleti (şu an passthrough)
+- `gemstone_exploration_demo`: LiDAR + motion state verisiyle çalışan,
+  timestamp kontrollü demo gezinti/planner davranışı
 - `gemstone_motor_driver`: `/cmd_vel` -> motor GPIO sürüşü, isteğe bağlı
   encoder odometrisi ve IMU + wheel odom birleştiren hareket durumu yayını
 - `gemstone_obstacle_avoidance`: `/scan`'e bakıp ileri hızı sınırlayan karar node'u
@@ -99,6 +101,7 @@ Gerçek topic'ler:
 - `/wheel_odom` (enkoder tabanlı teker odometrisi)
 - `/motion_state/odom`, `/motion_state/yaw`, `/motion_state/encoder_available`
 - `/scan`, `/odom_rf2o` (lazer tabanlı odometri)
+- `/cmd_vel_nav` (demo planner ve Nav2 çıkışı için ara komut)
 - `/ultrasonic1/range`, `/ultrasonic2/range`
 - `/obstacle_avoidance/blocked`
 - `/camera/image_raw`, `/camera/image_processed`
