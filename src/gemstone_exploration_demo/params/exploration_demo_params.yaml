@@ -1,0 +1,29 @@
+gemstone_exploration_demo_node:
+  ros__parameters:
+    scan_topic: scan
+    odom_topic: motion_state/odom
+    encoder_available_topic: motion_state/encoder_available
+    output_cmd_vel_topic: cmd_vel_nav
+
+    scan_timeout: 0.5
+    odom_timeout: 0.5
+    control_rate_hz: 10.0
+    random_seed: 42
+
+    sector_width_deg: 15.0
+    min_clearance_m: 1.2
+    target_distance_scale: 0.75
+    min_goal_distance_m: 0.8
+    max_goal_distance_m: 2.5
+    goal_tolerance_m: 0.25
+    heading_tolerance_deg: 12.0
+    max_goal_time_sec: 12.0
+
+    front_obstacle_distance_m: 0.55
+    wall_follow_linear_speed: 0.12
+    wall_follow_angular_gain: 1.6
+    wall_follow_target_side_distance_m: 0.60
+    max_linear_speed: 0.28
+    max_angular_speed: 0.9
+    goal_heading_gain: 1.8
+    goal_distance_gain: 0.6
