@@ -9,7 +9,8 @@
 # T3 Gemstone Bumin IKA
 
 <p align="center">
-  <a href="https://github.com/alihaydarsucu/t3gemstone-bumin-ika"><img alt="Source repo" src="https://img.shields.io/badge/Source-app_repo-black.svg"></a>
+  <a href="https://t3gemstone.org"><img alt="T3 Foundation" src="https://raw.githubusercontent.com/t3gemstone/docs/main/images/t3-foundation.svg"></a>
+  <a href="https://opensource.org/licenses/Apache-2.0"><img alt="License" src="https://img.shields.io/badge/License-Apache_2.0-blue.svg"></a>
   <a href="https://github.com/alitalhq/t3gemstone-bumin-ika-docs"><img alt="Docs repo" src="https://img.shields.io/badge/Docs-repo-red.svg"></a>
   <a href="https://github.com/alitalhq/t3gemstone-bumin-ika-docs/tree/main/docs/tr/01-kart-kurulumu.md"><img alt="TR docs" src="https://img.shields.io/badge/Docs-TR-red.svg"></a>
   <a href="https://github.com/alitalhq/t3gemstone-bumin-ika-docs/tree/main/docs/en/01-board-setup.md"><img alt="EN docs" src="https://img.shields.io/badge/Docs-EN-blue.svg"></a>
