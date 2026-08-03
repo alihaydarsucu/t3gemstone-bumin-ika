@@ -28,6 +28,7 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     bringup_share = get_package_share_directory('gemstone_bringup')
+    exploration_demo_share = get_package_share_directory('gemstone_exploration_demo')
     lidar_bringup_share = get_package_share_directory('gemstone_lidar_bringup')
     camera_share = get_package_share_directory('gemstone_camera')
 
@@ -36,12 +37,16 @@ def generate_launch_description():
     motor_params_file = os.path.join(bringup_share, 'params', 'motor_driver_params.yaml')
     motion_state_params_file = os.path.join(bringup_share, 'params', 'motion_state_params.yaml')
     ultrasonic_params_file = os.path.join(bringup_share, 'params', 'ultrasonic_params.yaml')
+    exploration_demo_params_file = os.path.join(
+        exploration_demo_share, 'params', 'exploration_demo_params.yaml')
 
     # --- Ust duzey ac/kapat argumanlari ---
     enable_imu = DeclareLaunchArgument('enable_imu', default_value='true')
     enable_imu_filter = DeclareLaunchArgument('enable_imu_filter', default_value='true')
     enable_motor_driver = DeclareLaunchArgument('enable_motor_driver', default_value='true')
     enable_motion_state = DeclareLaunchArgument('enable_motion_state', default_value='true')
+    enable_exploration_demo = DeclareLaunchArgument(
+        'enable_exploration_demo', default_value='false')
     enable_ultrasonic = DeclareLaunchArgument('enable_ultrasonic', default_value='false')
     enable_camera = DeclareLaunchArgument('enable_camera', default_value='true')
     enable_image_proc = DeclareLaunchArgument('enable_image_proc', default_value='true')
@@ -111,6 +116,15 @@ def generate_launch_description():
         parameters=[motion_state_params_file],
     )
 
+    exploration_demo_node = Node(
+        package='gemstone_exploration_demo',
+        executable='gemstone_exploration_demo_node',
+        name='gemstone_exploration_demo_node',
+        output='screen',
+        condition=IfCondition(LaunchConfiguration('enable_exploration_demo')),
+        parameters=[exploration_demo_params_file],
+    )
+
     ultrasonic_node = Node(
         package='gemstone_ultrasonic',
         executable='ultrasonic_node',
@@ -159,6 +173,7 @@ def generate_launch_description():
         enable_imu_filter,
         enable_motor_driver,
         enable_motion_state,
+        enable_exploration_demo,
         enable_ultrasonic,
         enable_camera,
         enable_image_proc,
@@ -173,6 +188,7 @@ def generate_launch_description():
         imu_filter_node,
         motor_driver_node,
         motion_state_node,
+        exploration_demo_node,
         ultrasonic_node,
         camera_launch,
         image_proc_node,

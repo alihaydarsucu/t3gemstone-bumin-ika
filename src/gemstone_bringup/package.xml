@@ -20,6 +20,7 @@
   <exec_depend>rviz2</exec_depend>
   <exec_depend>gemstone_imu</exec_depend>
   <exec_depend>gemstone_motor_driver</exec_depend>
+  <exec_depend>gemstone_exploration_demo</exec_depend>
   <exec_depend>gemstone_ultrasonic</exec_depend>
   <exec_depend>gemstone_camera</exec_depend>
   <exec_depend>gemstone_image_proc</exec_depend>
