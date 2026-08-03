@@ -108,16 +108,31 @@ class MotorDriverNode(Node):
             self.get_parameter('motor2_in2_line').value,
             invert=self.get_parameter('motor2_invert').value)
 
-        self.encoder1 = QuadratureEncoder(
-            self.chip,
+        encoder_lines = [
             self.get_parameter('encoder1_a_line').value,
             self.get_parameter('encoder1_b_line').value,
-            invert=self.get_parameter('encoder1_invert').value)
-        self.encoder2 = QuadratureEncoder(
-            self.chip,
             self.get_parameter('encoder2_a_line').value,
             self.get_parameter('encoder2_b_line').value,
-            invert=self.get_parameter('encoder2_invert').value)
+        ]
+        if all(line >= 0 for line in encoder_lines):
+            self.encoder1 = QuadratureEncoder(
+                self.chip,
+                self.get_parameter('encoder1_a_line').value,
+                self.get_parameter('encoder1_b_line').value,
+                invert=self.get_parameter('encoder1_invert').value)
+            self.encoder2 = QuadratureEncoder(
+                self.chip,
+                self.get_parameter('encoder2_a_line').value,
+                self.get_parameter('encoder2_b_line').value,
+                invert=self.get_parameter('encoder2_invert').value)
+            self.encoders_enabled = True
+        else:
+            self.encoder1 = None
+            self.encoder2 = None
+            self.encoders_enabled = False
+            self.get_logger().info(
+                'Encoder pinleri tanimli degil; motor driver enkodersiz '
+                '(open-loop) calisacak ve wheel odom yayinlamayacak.')
 
         self.last_cmd = Twist()
         self.last_cmd_time = self.get_clock().now()
@@ -135,7 +150,8 @@ class MotorDriverNode(Node):
             f'Motor surucu basladi (GPIO/libgpiod): chip={gpio_chip_name} '
             f'wheel_separation={self.wheel_separation} m '
             f'wheel_radius={self.wheel_radius} m '
-            f'ticks_per_rev={self.ticks_per_rev}')
+            f'ticks_per_rev={self.ticks_per_rev} '
+            f'encoders_enabled={self.encoders_enabled}')
 
     def cmd_vel_cb(self, msg: Twist):
         self.last_cmd = msg
@@ -159,6 +175,8 @@ class MotorDriverNode(Node):
         self._update_odometry(now)
 
     def _update_odometry(self, now: Time):
+        if not self.encoders_enabled:
+            return
         dt = (now - self.last_odom_time).nanoseconds / 1e9
         self.last_odom_time = now
         if dt <= 0.0:
@@ -211,8 +229,10 @@ class MotorDriverNode(Node):
             self.motor2.stop()
             self.motor1.release()
             self.motor2.release()
-            self.encoder1.stop()
-            self.encoder2.stop()
+            if self.encoder1 is not None:
+                self.encoder1.stop()
+            if self.encoder2 is not None:
+                self.encoder2.stop()
         except Exception:
             pass
         super().destroy_node()

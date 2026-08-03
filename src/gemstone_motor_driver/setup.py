@@ -23,6 +23,7 @@ setup(
     entry_points={
         'console_scripts': [
             'motor_driver_node = gemstone_motor_driver.motor_driver_node:main',
+            'motion_state_node = gemstone_motor_driver.motion_state_node:main',
         ],
     },
 )

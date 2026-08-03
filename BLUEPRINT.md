@@ -69,6 +69,8 @@ dogrudan baglaniyor (guc: harici 2S pil motoru besliyor, Gemstone sadece
 
 ### 3. Node Layer
 - `gemstone_image_proc`: görüntü işleme iskeleti (şu an passthrough)
+- `gemstone_motor_driver`: `/cmd_vel` -> motor GPIO sürüşü, isteğe bağlı
+  encoder odometrisi ve IMU + wheel odom birleştiren hareket durumu yayını
 - `gemstone_obstacle_avoidance`: `/scan`'e bakıp ileri hızı sınırlayan karar node'u
 - `slam_toolbox` (third-party): online haritalama
 - `nav2_bringup` (third-party): otonom navigasyon
@@ -95,6 +97,7 @@ Gerçek topic'ler:
 - `/imu/data_raw`, `/imu/data` (Madgwick filtreli)
 - `/cmd_vel`, `/cmd_vel_nav`
 - `/wheel_odom` (enkoder tabanlı teker odometrisi)
+- `/motion_state/odom`, `/motion_state/yaw`, `/motion_state/encoder_available`
 - `/scan`, `/odom_rf2o` (lazer tabanlı odometri)
 - `/ultrasonic1/range`, `/ultrasonic2/range`
 - `/obstacle_avoidance/blocked`

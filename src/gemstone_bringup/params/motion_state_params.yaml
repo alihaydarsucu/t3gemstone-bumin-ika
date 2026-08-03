@@ -1,0 +1,11 @@
+motion_state_node:
+  ros__parameters:
+    imu_topic: imu/data
+    wheel_odom_topic: wheel_odom
+    output_odom_topic: motion_state/odom
+    output_yaw_topic: motion_state/yaw
+    output_encoder_available_topic: motion_state/encoder_available
+    wheel_odom_timeout: 0.5
+    imu_yaw_weight: 0.7
+    frame_id: odom
+    child_frame_id: base_link

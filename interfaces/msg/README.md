@@ -12,6 +12,9 @@ ek dönüşüm olmadan doğrudan çalışıyor:
 | IMU (yönelimli) | `sensor_msgs/Imu` | `imu/data` |
 | Lidar tarama | `sensor_msgs/LaserScan` | `scan` |
 | Lidar odometrisi | `nav_msgs/Odometry` | `odom_rf2o` |
+| Birlesik hareket durumu | `nav_msgs/Odometry` | `motion_state/odom` |
+| Yaw acisi | `std_msgs/Float64` | `motion_state/yaw` |
+| Encoder durumu | `std_msgs/Bool` | `motion_state/encoder_available` |
 | Hız komutu | `geometry_msgs/Twist` | `cmd_vel`, `cmd_vel_nav` |
 | Kamera karesi | `sensor_msgs/Image` | `camera/image_raw`, `camera/image_processed` |
 | Harita | `nav_msgs/OccupancyGrid` | `map` |
