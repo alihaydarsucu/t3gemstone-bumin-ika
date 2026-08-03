@@ -1,9 +1,8 @@
-"""MX1508 (Harezmi karti uzerindeki dual H-bridge) cikisini libgpiod ile
-suren sinif.
+"""L298N (veya IN1/IN2 tipi baska bir dual H-bridge modulu) cikisini
+libgpiod ile suren sinif.
 
-MX1508'in her kanali 2 dijital giris bekler (IN1/IN2 -- Harezmi + Deneyap
-pin haritasinda D12/D13 motor1, D14/D15 motor2 idi, simdi Gemstone GPIO'suna
-tasiniyor):
+Bu tip suruculerin her kanali 2 dijital giris bekler (IN1/IN2, ya da
+bazi kompakt klonlarda A1/A2 - B1/B2 olarak etiketlenir, mantik ayni):
     IN1=HIGH, IN2=LOW  -> ileri
     IN1=LOW,  IN2=HIGH -> geri
     IN1=IN2=LOW         -> coast (bosta, serbest doner)

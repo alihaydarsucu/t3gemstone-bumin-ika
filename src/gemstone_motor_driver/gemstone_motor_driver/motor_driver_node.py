@@ -1,13 +1,20 @@
 """gemstone_motor_driver: /cmd_vel (geometry_msgs/Twist) komutunu
 diferansiyel surus kinematigiyle sol/sag teker yonune cevirip Gemstone'un
-GPIO'lari uzerinden (libgpiod) Harezmi kartindaki MX1508 H-bridge'i suren,
-ve kadratur enkoderlerden tekerlek odometrisi (nav_msgs/Odometry) ureten
-node.
+GPIO'lari uzerinden (libgpiod) harici bir L298N (veya benzeri IN1/IN2 tipi)
+H-bridge suruculeru suren, ve (varsa) kadratur enkoderlerden tekerlek
+odometrisi (nav_msgs/Odometry) ureten node.
 
-Mimari notu: Bu node artik harici bir surucu karta UART ile KOMUT
-GONDERMIYOR -- Gemstone, Harezmi kartindaki Deneyap'in yerini alarak
-motorlari VE enkoderleri DOGRUDAN GPIO uzerinden suruyor/okuyor (bkz.
-BLUEPRINT.md, mimari karar guncellemesi).
+Mimari notu: Motorlar VE (kullaniliyorsa) enkoderler Gemstone'un GPIO'larindan
+DOGRUDAN suruluyor/okunuyor, ayri bir mikrodenetleyici veya surucu karti yok
+(bkz. BLUEPRINT.md).
+
+Bu projede enkoder KULLANILMIYOR (motor uzerindeki enkoder kablolari boyna
+birakildi) -- hareket durumu/yon takibi IMU tabaninda `motion_state_node`
+uzerinden yapiliyor (bkz. `motion_state_node.py`). Encoder pinleri params
+dosyasinda -1 birakilirsa bu node otomatik olarak open-loop calisir ve
+`wheel_odom` yayinlamaz; asagidaki kod enkoder destegini yine de opsiyonel
+olarak koruyor, ileride biri enkoderi baglamak isterse tek yapmasi gereken
+params dosyasindaki 4 pini doldurmak.
 
 Guvenlik: /cmd_vel belirli bir sure (cmd_vel_timeout) icinde gelmezse
 motorlar otomatik durur (watchdog), tipki eski UART implementasyonunda

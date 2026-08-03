@@ -14,7 +14,7 @@ Bu klasör kısa pinout ve bağlantı özetleri içindir. Ayrıntılı dokümant
 ## Kısa Özet
 
 - IMU kart üzerinde SPI ile gelir.
-- Motor ve enkoder akışı GPIO ile sürülür.
+- Motor akışı (L298N H-bridge) GPIO ile sürülür; tekerlek enkoderi kullanılmıyor, hareket takibi IMU tabanlı `motion_state_node` ile yapılıyor.
 - Ultrasonik sensörler yine GPIO ile okunur.
 - Lidar USB seri üzerinden bağlanır.
 - Kamera CSI üzerinden bağlanır.

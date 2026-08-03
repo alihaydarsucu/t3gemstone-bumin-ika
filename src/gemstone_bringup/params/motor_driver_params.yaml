@@ -7,30 +7,30 @@ motor_driver_node:
     # "Pin 1" isaretiyle mutlaka gorsel olarak dogrulayin.
     gpio_chip: gpiochip3
 
-    # Motor 1 (sol) -- Harezmi/Deneyap pin haritasinda D12/D13 idi
+    # Motor 1 (sol) -- L298N'in IN1/IN2'sine (kompakt klonlarda A1/A2) bagli
     motor1_in1_line: 7   # GPIO16, fiziksel pin 36
     motor1_in2_line: 8   # GPIO17, fiziksel pin 11
     motor1_invert: false
 
-    # Motor 2 (sag) -- Harezmi/Deneyap pin haritasinda D14/D15 idi
+    # Motor 2 (sag) -- L298N'in IN3/IN4'une (kompakt klonlarda B1/B2) bagli
     motor2_in1_line: 16  # GPIO12, fiziksel pin 32
     motor2_in2_line: 18  # GPIO13, fiziksel pin 33
     motor2_invert: false
 
-    # Enkoder 1 (motor 1 ile ayni taraf) -- Deneyap'ta D2 (Kanal A,
-    # interrupt) / D9 (Kanal B) idi
-    encoder1_a_line: 9   # GPIO21, fiziksel pin 40
-    encoder1_b_line: 10  # GPIO20, fiziksel pin 38
+    # Enkoder KULLANILMIYOR: motordaki enkoder kablolari (VCC/GND/A/B)
+    # baglanmadi, hareket takibi motion_state_node uzerinden IMU ile
+    # yapiliyor. Satirlari -1 birakmak motor_driver_node'u otomatik
+    # olarak open-loop (wheel_odom yayinlamadan) calistirir. Ileride
+    # enkoder baglanirsa bu 4 satiri gercek line numaralarina cevirin.
+    encoder1_a_line: -1
+    encoder1_b_line: -1
     encoder1_invert: false
 
-    # Enkoder 2 (motor 2 ile ayni taraf) -- Deneyap'ta D3 (Kanal A,
-    # interrupt) / A7-D16 (Kanal B) idi
-    encoder2_a_line: 11  # GPIO18, fiziksel pin 12
-    encoder2_b_line: 12  # GPIO19, fiziksel pin 35
+    encoder2_a_line: -1
+    encoder2_b_line: -1
     encoder2_invert: false
 
-    # YER TUTUCU: tekerlegi elle tam bir tur cevirip tik sayisini sayarak
-    # gercek degeri bulun.
+    # Enkoder kullanilmadigi icin bu deger su an etkisiz.
     encoder_ticks_per_revolution: 20.0
     # DIKKAT: gemstone_bringup/urdf/gemstone_ugv.urdf.xacro icindeki
     # wheel_radius ile AYNI tutun.
