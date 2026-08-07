@@ -15,7 +15,7 @@ motor_driver_node:
     # Motor 2 (sag) -- L298N'in IN3/IN4'une (kompakt klonlarda B1/B2) bagli
     motor2_in1_line: 16  # GPIO12, fiziksel pin 32
     motor2_in2_line: 18  # GPIO13, fiziksel pin 33
-    motor2_invert: false
+    motor2_invert: true  # gpioset testinde dogrulandi: invert olmadan ters donuyordu
 
     # Enkoder KULLANILMIYOR: motordaki enkoder kablolari (VCC/GND/A/B)
     # baglanmadi, hareket takibi motion_state_node uzerinden IMU ile
