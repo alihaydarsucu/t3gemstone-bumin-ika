@@ -65,8 +65,8 @@ class MotorDriverNode(Node):
 
         # PWM ile gercek hiz kontrolu (opsiyonel): chip/channel < 0 ise
         # o motor icin PWM atlanir, eskisi gibi bang-bang (tam hiz) calisir.
-        # Gemstone'da su an sadece iki donanimsal PWM kanali var (ecap0 ->
-        # pwmchip0/pwm0 = GPIO12, epwm1 -> pwmchip5/pwm1 = GPIO13).
+        # Gemstone'da kullandigimiz iki bagimsiz/paylasimsiz eCAP kanali
+        # (ecap0 -> pwmchip0/pwm0 = GPIO12, ecap2 -> pwmchip2/pwm0 = GPIO18).
         self.declare_parameter('motor1_pwm_chip', -1)
         self.declare_parameter('motor1_pwm_channel', -1)
         self.declare_parameter('motor1_pwm_period_ns', 1_000_000)

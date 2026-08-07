@@ -9,7 +9,7 @@ bazi kompakt klonlarda A1/A2 - B1/B2 olarak etiketlenir, mantik ayni):
 
 Hiz kontrolu: yon (IN1/IN2) libgpiod ile dijital surulur. Hiz icin
 opsiyonel bir `pwm` (bkz. sysfs_pwm.SysfsPwm) verilirse, ENA/ENB'ye
-gercek donanimsal PWM (Gemstone'un ecap0/epwm1 overlay'leri, bkz.
+gercek donanimsal PWM (Gemstone'un ecap0/ecap2 overlay'leri, bkz.
 sysfs_pwm.py) yazilir. `pwm=None` ise (varsayilan) davranis eskisiyle
 ayni: ENA/ENB kartta jumper ile sabit HIGH kabul edilir, sadece
 yon degisir, hiz her zaman tam guctur (bang-bang).
