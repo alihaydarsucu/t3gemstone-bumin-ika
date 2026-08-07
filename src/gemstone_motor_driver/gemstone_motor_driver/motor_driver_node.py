@@ -47,6 +47,7 @@ from gemstone_motor_driver.differential_drive import (
 )
 from gemstone_motor_driver.gpio_motor import GpioHBridgeMotor
 from gemstone_motor_driver.quadrature_encoder import QuadratureEncoder
+from gemstone_motor_driver.sysfs_pwm import SysfsPwm
 
 
 class MotorDriverNode(Node):
@@ -61,6 +62,17 @@ class MotorDriverNode(Node):
         self.declare_parameter('motor2_in2_line', -1)
         self.declare_parameter('motor1_invert', False)
         self.declare_parameter('motor2_invert', False)
+
+        # PWM ile gercek hiz kontrolu (opsiyonel): chip/channel < 0 ise
+        # o motor icin PWM atlanir, eskisi gibi bang-bang (tam hiz) calisir.
+        # Gemstone'da su an sadece iki donanimsal PWM kanali var (ecap0 ->
+        # pwmchip0/pwm0 = GPIO12, epwm1 -> pwmchip5/pwm1 = GPIO13).
+        self.declare_parameter('motor1_pwm_chip', -1)
+        self.declare_parameter('motor1_pwm_channel', -1)
+        self.declare_parameter('motor1_pwm_period_ns', 1_000_000)
+        self.declare_parameter('motor2_pwm_chip', -1)
+        self.declare_parameter('motor2_pwm_channel', -1)
+        self.declare_parameter('motor2_pwm_period_ns', 1_000_000)
 
         self.declare_parameter('encoder1_a_line', -1)
         self.declare_parameter('encoder1_b_line', -1)
@@ -108,12 +120,14 @@ class MotorDriverNode(Node):
             self.chip,
             self.get_parameter('motor1_in1_line').value,
             self.get_parameter('motor1_in2_line').value,
-            invert=self.get_parameter('motor1_invert').value)
+            invert=self.get_parameter('motor1_invert').value,
+            pwm=self._make_pwm('motor1'))
         self.motor2 = GpioHBridgeMotor(
             self.chip,
             self.get_parameter('motor2_in1_line').value,
             self.get_parameter('motor2_in2_line').value,
-            invert=self.get_parameter('motor2_invert').value)
+            invert=self.get_parameter('motor2_invert').value,
+            pwm=self._make_pwm('motor2'))
 
         encoder_lines = [
             self.get_parameter('encoder1_a_line').value,
@@ -159,6 +173,23 @@ class MotorDriverNode(Node):
             f'wheel_radius={self.wheel_radius} m '
             f'ticks_per_rev={self.ticks_per_rev} '
             f'encoders_enabled={self.encoders_enabled}')
+
+    def _make_pwm(self, motor_prefix: str) -> 'SysfsPwm | None':
+        chip = self.get_parameter(f'{motor_prefix}_pwm_chip').value
+        channel = self.get_parameter(f'{motor_prefix}_pwm_channel').value
+        if chip < 0 or channel < 0:
+            return None
+        period_ns = self.get_parameter(f'{motor_prefix}_pwm_period_ns').value
+        try:
+            pwm = SysfsPwm(chip, channel, period_ns=period_ns)
+        except OSError as e:
+            self.get_logger().error(
+                f'{motor_prefix} PWM acilamadi (pwmchip{chip}/pwm{channel}): {e} '
+                '-- bang-bang (tam hiz) modunda devam edilecek.')
+            return None
+        self.get_logger().info(
+            f'{motor_prefix} PWM etkin: pwmchip{chip}/pwm{channel}, period={period_ns}ns')
+        return pwm
 
     def cmd_vel_cb(self, msg: Twist):
         self.last_cmd = msg
