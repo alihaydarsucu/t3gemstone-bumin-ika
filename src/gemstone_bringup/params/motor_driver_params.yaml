@@ -2,10 +2,13 @@ motor_driver_node:
   ros__parameters:
     # `gpiodetect`/`gpioinfo` ile dogrulandi (2026-07-30): GPIO2/3 (I2C),
     # GPIO7/8/9/10/11 (SPI0 -- IMU spidev0.3 bunu kullaniyor),
-    # GPIO4/14/15/17 (UART-MAIN1/6) KULLANILMADI. GPIO12/13 artik PWM
-    # (ecap0/epwm1 overlay, /boot/uEnv.txt) icin kullaniliyor, asagida
-    # motor*_pwm_chip/channel'a bakin. Fiziksel pin numaralari standart
-    # RPi 40-pin header varsayimiyla, kartin "Pin 1" isaretiyle mutlaka
+    # GPIO4/14/15/17 (UART-MAIN1/6) KULLANILMADI. GPIO12 ve GPIO18 artik PWM
+    # (ecap0/ecap2 overlay, /boot/uEnv.txt) icin kullaniliyor, asagida
+    # motor*_pwm_chip/channel'a bakin. NOT: GPIO13 (epwm1) bilerek
+    # KULLANILMADI -- o kanal karttaki fan ile (pwmchip5/pwm0, ayni zaman
+    # tabani) donanimsal olarak cakisiyor, "period value conflicts with
+    # channel 0" hatasi veriyordu. Fiziksel pin numaralari standart RPi
+    # 40-pin header varsayimiyla, kartin "Pin 1" isaretiyle mutlaka
     # gorsel olarak dogrulayin.
     gpio_chip: gpiochip3
 
@@ -15,32 +18,33 @@ motor_driver_node:
     motor1_invert: false
 
     # Motor 2 (sag) -- L298N'in IN3/IN4'une (kompakt klonlarda B1/B2) bagli.
-    # Eskiden line 16/18 (GPIO12/13) kullaniliyordu, ama o pinler artik PWM
-    # icin ayrildigi icin (asagi bakin) eskiden encoder2'ye ayrilmis, su an
-    # bos duran line 11/12'ye tasindi.
-    motor2_in1_line: 11  # GPIO18, fiziksel pin 12
+    # IN1 eskiden encoder2'ye ayrilmis line 11'deydi (GPIO18), ama o pin
+    # artik PWM icin ayrildigi icin (asagi bakin) eskiden encoder1'e
+    # ayrilmis, su an bos duran line 9'a tasindi.
+    motor2_in1_line: 9   # GPIO21, fiziksel pin 40
     motor2_in2_line: 12  # GPIO19, fiziksel pin 35
     motor2_invert: true  # gpioset testinde dogrulandi: invert olmadan ters donuyordu
 
-    # Gercek hiz kontrolu (PWM): Gemstone'da acilista aktif iki donanimsal
-    # PWM kanali var (bkz. /boot/uEnv.txt overlays=...-pwm-ecap0-gpio12,
-    # ...-pwm-epwm1-gpio13 ve docs.t3gemstone.org PWM sayfasi). Bu ikisi
+    # Gercek hiz kontrolu (PWM): iki bagimsiz/paylasimsiz eCAP kanali
+    # kullaniliyor (bkz. /boot/uEnv.txt overlays=...-pwm-ecap0-gpio12,
+    # ...-pwm-ecap2-gpio18 ve docs.t3gemstone.org PWM sayfasi). Bu ikisi
     # L298N'in ENA/ENB'sine baglaniyor (jumper kapaklari CIKARILMALI):
     #   motor1 (ENA) -> GPIO12, fiziksel pin 32 -> pwmchip0/pwm0 (ecap0)
-    #   motor2 (ENB) -> GPIO13, fiziksel pin 33 -> pwmchip5/pwm1 (epwm1)
+    #   motor2 (ENB) -> GPIO18, fiziksel pin 12 -> pwmchip2/pwm0 (ecap2)
     motor1_pwm_chip: 0
     motor1_pwm_channel: 0
     motor1_pwm_period_ns: 1000000   # 1kHz, gerekirse ayarlayin
-    motor2_pwm_chip: 5
-    motor2_pwm_channel: 1
+    motor2_pwm_chip: 2
+    motor2_pwm_channel: 0
     motor2_pwm_period_ns: 1000000
 
     # Enkoder KULLANILMIYOR: motordaki enkoder kablolari (VCC/GND/A/B)
     # baglanmadi, hareket takibi motion_state_node uzerinden IMU ile
     # yapiliyor. Satirlari -1 birakmak motor_driver_node'u otomatik
-    # olarak open-loop (wheel_odom yayinlamadan) calistirir. encoder2'ye
-    # ayrilmis pinler artik motor2 yon sinyali tasidigi icin (yukarida),
-    # sadece encoder1 pinleri gercekten bos/kullanilabilir durumda.
+    # olarak open-loop (wheel_odom yayinlamadan) calistirir. Eski
+    # encoder1/encoder2 pinlerinin ucu artik motor2 yon sinyali (line 9)
+    # ve PWM (line 11/GPIO18) tasidigi icin gercekten bos kalan tek pin
+    # line 10 (GPIO20, fiziksel pin 38).
     encoder1_a_line: -1
     encoder1_b_line: -1
     encoder1_invert: false
