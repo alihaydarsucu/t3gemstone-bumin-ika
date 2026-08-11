@@ -20,16 +20,15 @@
 >
 > **[EN]** A differential-drive UGV project running on the T3 Gemstone O1, bringing sensors and motor workflows together in a single ROS 2 bringup flow.
 
+<p align="center">
+  <img src="assets/ugv-bare-chassis.jpeg" alt="Bare chassis" width="31%" />
+  <img src="assets/ugv-wiring-rear.jpeg" alt="Wiring rear view" width="31%" />
+  <img src="assets/ugv-assembled-front.jpeg" alt="Assembled front view" width="31%" />
+</p>
+
 ## Kısa Tanım
 
 Bu repo ana uygulama kodunu ve kısa çalışma notlarını içerir. Ayrıntılı dokümantasyon için doğrudan kaynak dosyalara geçin:
-
-<p align="center">
-  <img src="assets/under-construction.avif" alt="Hazırlık aşamasında" width="30%" />
-</p>
-<p align="center">
-  <small>Bu alana saha doğrulama görselleri, örnek akış ekranları ve kısa kullanım notları eklenecek.</small>
-</p>
 
 - [Türkçe dokümanlar](https://github.com/alitalhq/t3gemstone-bumin-ika-docs/tree/main/docs/tr)
 - [English docs](https://github.com/alitalhq/t3gemstone-bumin-ika-docs/tree/main/docs/en)
