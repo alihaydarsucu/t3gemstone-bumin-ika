@@ -67,7 +67,7 @@ ros2 launch gemstone_sim sim_bringup.launch.py
 ```
 
 <video controls width="100%">
-  <source src="https://raw.githubusercontent.com/alitalhq/t3gemstone-bumin-ika-docs/main/docs/assets/sim/sim-office-exploration.webm" type="video/webm">
+  <source src="https://raw.githubusercontent.com/alitalhq/t3gemstone-bumin-ika-docs/main/docs/assets/sim/sim-office-exploration.mp4" type="video/mp4">
   Tarayıcınız video etiketini desteklemiyor.
 </video>
 
