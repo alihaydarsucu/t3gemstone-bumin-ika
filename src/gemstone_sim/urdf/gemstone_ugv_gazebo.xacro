@@ -77,6 +77,14 @@
   <xacro:property name="driver_z" value="${board_z}"/>
   <xacro:property name="driver_mass" value="0.05"/>
 
+  <!-- mid_plate cizelgesi: gemstone/motor surucu/ust kapi mid_plate'in COCUGU
+       oldugu icin bu eklemlerin origin'leri mid_plate'e GORE (relative) olmali.
+       Dikkat: mutlak yukseklikler (board_z/top_plate_z) sadece base_link'in
+       dogrudan cocugu olan linklerde (lidar/camera/imu) kullanilabilir. -->
+  <xacro:property name="board_rel_z" value="${mid_plate_thickness/2 + board_thickness/2}"/>
+  <xacro:property name="driver_rel_z" value="${mid_plate_thickness/2 + driver_thickness/2}"/>
+  <xacro:property name="top_plate_rel_z" value="${top_plate_z - mid_plate_z}"/>
+
   <!-- Ust kapi tablasi (A1M8 lidar) -->
   <xacro:property name="top_plate_length" value="0.22"/>
   <xacro:property name="top_plate_width" value="0.16"/>
@@ -272,7 +280,7 @@
   <joint name="gemstone_joint" type="fixed">
     <parent link="mid_plate_link"/>
     <child link="gemstone_link"/>
-    <origin xyz="0 0 ${board_z}" rpy="0 0 0"/>
+    <origin xyz="0 0 ${board_rel_z}" rpy="0 0 0"/>
   </joint>
 
   <!-- Motor surucu: gemstone kartinin yaninda -->
@@ -297,7 +305,7 @@
   <joint name="motor_driver_joint" type="fixed">
     <parent link="mid_plate_link"/>
     <child link="motor_driver_link"/>
-    <origin xyz="${driver_x} 0 ${driver_z}" rpy="0 0 0"/>
+    <origin xyz="${driver_x} 0 ${driver_rel_z}" rpy="0 0 0"/>
   </joint>
 
   <!-- ===================== UST KAT: platform tablasi ===================== -->
@@ -322,7 +330,7 @@
   <joint name="top_plate_joint" type="fixed">
     <parent link="mid_plate_link"/>
     <child link="top_plate_link"/>
-    <origin xyz="0 0 ${top_plate_z}" rpy="0 0 0"/>
+    <origin xyz="0 0 ${top_plate_rel_z}" rpy="0 0 0"/>
   </joint>
 
   <!-- A1M8 lidar: ust katin uzerinde, en tepede -->
@@ -531,9 +539,38 @@
     </plugin>
   </gazebo>
 
-  <!-- Gölgelendirme iyileştirmesi (isteğe bağlı görsel) -->
+  <!-- Görsel malzemeler. NOT: URDF <visual><material name="..."> referanslari
+       URDF->SDF donusumunde atilir (model gri render olur); bu yuzden her linke
+       acikca <gazebo reference><material> override'i verilir. -->
   <gazebo reference="base_link">
     <material>Gazebo/Gray</material>
+  </gazebo>
+  <gazebo reference="mid_plate_link">
+    <material>Gazebo/Gray</material>
+  </gazebo>
+  <gazebo reference="top_plate_link">
+    <material>Gazebo/Gray</material>
+  </gazebo>
+  <gazebo reference="battery_link">
+    <material>Gazebo/Red</material>
+  </gazebo>
+  <gazebo reference="gemstone_link">
+    <material>Gazebo/DarkGreen</material>
+  </gazebo>
+  <gazebo reference="motor_driver_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+  <gazebo reference="lidar_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  <gazebo reference="camera_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  <gazebo reference="imu_link">
+    <material>Gazebo/White</material>
+  </gazebo>
+  <gazebo reference="caster_wheel_link">
+    <material>Gazebo/White</material>
   </gazebo>
   <gazebo reference="left_wheel_link">
     <material>Gazebo/DarkGrey</material>
