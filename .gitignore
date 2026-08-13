@@ -11,3 +11,5 @@ __pycache__/
 .DS_Store
 src/rf2o_laser_odometry/
 src/sllidar_ros2/
+.drift/
+.vscode/
