@@ -39,15 +39,50 @@ Tek kart yaklaşımı kullanılır. IMU, motor sürücü, ultrasonik sensörler,
 ## Neler Var?
 
 - `src/` - ROS 2 paketleri
+- `src/gemstone_sim/` - Gazebo Classic ofis simülasyonu
+- `assets/sim/` - simülasyon görselleri
 - `hardware/` - kısa donanım notları
 - `tools/` - yardımcı araçlar için kısa alan
+- `docs/tr/simulasyon.md` - simülasyonu çalıştırma notları
 - `docs/llms.txt` - docs reposundaki içerik haritası
+
+## Simülasyon (Gazebo)
+
+Donanım olmadan üst katman node'larını test etmek için `gemstone_sim`
+paketi, Gazebo Classic içinde özel bir **ofis dünyası** kullanır. Gerçek
+donanım katmanlarının yerini `gazebo_ros` plugin'leri alır; `motion_state`,
+`exploration_demo`, `obstacle_avoidance` ve `image_processing` node'ları
+aynı topic isimleriyle olduğu gibi çalışır.
+
+Kurulum ve çalıştırma için [docs/tr/simulasyon.md](docs/tr/simulasyon.md)
+ve docs reposundaki
+[13-simulasyon](https://github.com/alitalhq/t3gemstone-bumin-ika-docs/blob/main/docs/tr/13-simulasyon.md)
+sayfasına bakın:
+
+```bash
+cd /ros_ws && source /opt/ros/humble/setup.bash
+colcon build --symlink-install --packages-select gemstone_sim
+source install/setup.bash
+ros2 launch gemstone_sim sim_bringup.launch.py
+```
+
+<video controls width="100%">
+  <source src="https://raw.githubusercontent.com/alitalhq/t3gemstone-bumin-ika-docs/main/docs/assets/sim/sim-office-exploration.webm" type="video/webm">
+  Tarayıcınız video etiketini desteklemiyor.
+</video>
+
+<p align="center">
+  <img src="assets/sim/sim-office-overview.jpg" alt="Office world overview" width="31%" />
+  <img src="assets/sim/sim-robot-exploring.jpg" alt="Robot exploring the office" width="31%" />
+  <img src="assets/sim/sim-robot-navigation.jpg" alt="Robot navigating between obstacles" width="31%" />
+</p>
 
 ## Durum
 
 | Alan | Durum |
 |---|---|
 | Bringup | Tek launch ile çalışıyor |
+| Simülasyon | Gazebo ofis dünyası + gemstone node'ları |
 | Dokümantasyon | Ayrıntılı içerik docs reposunda |
 | Dil desteği | TR / EN girişleri mevcut |
 
