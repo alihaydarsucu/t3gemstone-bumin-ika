@@ -2,28 +2,39 @@
 <robot name="gemstone_ugv_gazebo" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!--
-    Gemstone UGV'nin Gazebo Classic simülasyonuna uygun hali.
+    Gemstone UGV'nin Gazebo Classic simülasyonuna uygun 3 katli hali.
     Gerçek robot URDF'i (gemstone_bringup/urdf/gemstone_ugv.urdf.xacro) ile
     aynı kinematik yapı (2 tahrik tekeri + 1 ön misket teker) kullanılır.
 
+    3 katli mekanik yapi (asagidan yukari):
+      - ALT KAT   : şasi tablasi + iki yanda encoder'li tahrik tekerleri +
+                    ortada 3S LiPo pil
+      - ORTA KAT  : gemstone (O1) karti + motor surucu (platformun uzerinde)
+      - UST KAT   : A1M8 lidar (platform uzerinde, en tepede)
+
+    ONEMLI: Her katmanın yerlesimi JOINT origin'inde tasinir; boylece her
+    linkin FRAME'i kendi katinda durur. Sensörler (<gazebo reference> ile
+    eklenen ray/imu/camera) linkin FRAME orijininden yayilir - eger joint
+    origin'i tasimazsaniz sensörler base_link orijininde (en altta) kalir.
+
     Farklar:
-      - Ölçüler fizik/denge için hafif düzeltildi (orijinal xacro'daki
-        değerler zaten "yer tutucu" idi). Tekerler şasinin altından taşar ve
-        robot yerde dengede durur (3 nokta: 2 teker + 1 misket).
+      - Ölçüler fizik/denge için hafif düzeltildi. Tekerler şasinin altından
+        taşar ve robot yerde dengede durur (3 nokta: 2 teker + 1 misket).
       - gazebo_ros plugin'leri eklendi:
           * diff_drive        -> /cmd_vel dinler, /odom + odom->base_link TF yayinlar
           * gpu/cpu ray lidar -> /scan (360 ornek, 3.5 m, RPLidar A1M8 benzeri)
-          * imu_sensor        -> /imu/data
-          * camera            -> /camera/image_raw
+          * imu_sensor        -> /imu/data (gemstone kartinin uzerinde)
+          * camera            -> /camera/image_raw (lidar duzleminin altinda)
           * joint_state       -> /joint_states (robot_state_publisher icin)
       - Tekerlekler yere tutunmasi icin yuksek surtunme (mu=100000) tanimli.
   -->
 
   <!-- ======================= Yer tutucu olculer (sim) ======================= -->
+  <!-- Alt kapi (base_link) tablasi -->
   <xacro:property name="chassis_length" value="0.30"/>
   <xacro:property name="chassis_width" value="0.20"/>
-  <xacro:property name="chassis_height" value="0.06"/>
-  <xacro:property name="chassis_mass" value="2.0"/>
+  <xacro:property name="chassis_thickness" value="0.03"/>
+  <xacro:property name="chassis_mass" value="1.0"/>
 
   <xacro:property name="wheel_radius" value="0.065"/>
   <xacro:property name="wheel_width" value="0.04"/>
@@ -38,6 +49,52 @@
   <xacro:property name="caster_x_offset" value="0.12"/>
   <xacro:property name="caster_z_offset" value="-0.055"/>
 
+  <!-- 3S LiPo pil (alt katin ortasinda) -->
+  <xacro:property name="battery_length" value="0.14"/>
+  <xacro:property name="battery_width" value="0.09"/>
+  <xacro:property name="battery_height" value="0.025"/>
+  <xacro:property name="battery_z" value="${chassis_thickness/2 + battery_height/2}"/>
+  <xacro:property name="battery_mass" value="0.25"/>
+
+  <!-- Orta kapi tablasi (gemstone + motor surucu) -->
+  <xacro:property name="mid_plate_length" value="0.28"/>
+  <xacro:property name="mid_plate_width" value="0.18"/>
+  <xacro:property name="mid_plate_thickness" value="0.03"/>
+  <xacro:property name="mid_plate_z" value="${chassis_thickness/2 + 0.04 + mid_plate_thickness/2}"/>
+  <xacro:property name="mid_plate_mass" value="0.8"/>
+
+  <!-- Gemstone O1 karti ve motor surucu (orta katin uzerinde) -->
+  <xacro:property name="board_length" value="0.08"/>
+  <xacro:property name="board_width" value="0.06"/>
+  <xacro:property name="board_thickness" value="0.015"/>
+  <xacro:property name="board_z" value="${mid_plate_z + mid_plate_thickness/2 + board_thickness/2}"/>
+  <xacro:property name="board_mass" value="0.05"/>
+
+  <xacro:property name="driver_length" value="0.05"/>
+  <xacro:property name="driver_width" value="0.04"/>
+  <xacro:property name="driver_thickness" value="0.015"/>
+  <xacro:property name="driver_x" value="0.055"/>
+  <xacro:property name="driver_z" value="${board_z}"/>
+  <xacro:property name="driver_mass" value="0.05"/>
+
+  <!-- Ust kapi tablasi (A1M8 lidar) -->
+  <xacro:property name="top_plate_length" value="0.22"/>
+  <xacro:property name="top_plate_width" value="0.16"/>
+  <xacro:property name="top_plate_thickness" value="0.02"/>
+  <xacro:property name="top_plate_z" value="${board_z + board_thickness/2 + 0.02 + top_plate_thickness/2}"/>
+  <xacro:property name="top_plate_mass" value="0.6"/>
+
+  <!-- A1M8 lidar (ust katin uzerinde, en tepede) -->
+  <xacro:property name="lidar_radius" value="0.026"/>
+  <xacro:property name="lidar_height" value="0.03"/>
+  <xacro:property name="lidar_z" value="${top_plate_z + top_plate_thickness/2 + lidar_height/2}"/>
+  <xacro:property name="lidar_mass" value="0.10"/>
+
+  <!-- Kamera: ust katin on kenarinda, lidar duzleminin ALTINDA kalsin ki
+       lidar ışınlarını engellemesin (lidar duzlemi z=lidar_z civarinda) -->
+  <xacro:property name="camera_x" value="${top_plate_length/2 + 0.015}"/>
+  <xacro:property name="camera_z" value="${top_plate_z - 0.01}"/>
+
   <material name="gemstone_gray">
     <color rgba="0.45 0.48 0.5 1.0"/>
   </material>
@@ -47,27 +104,61 @@
   <material name="gemstone_white">
     <color rgba="0.9 0.9 0.9 1.0"/>
   </material>
+  <material name="battery_red">
+    <color rgba="0.55 0.08 0.08 1.0"/>
+  </material>
+  <material name="pcb_green">
+    <color rgba="0.1 0.55 0.2 1.0"/>
+  </material>
+  <material name="driver_blue">
+    <color rgba="0.1 0.3 0.7 1.0"/>
+  </material>
 
-  <!-- ================================ Şasi ================================ -->
+  <!-- ================= ALT KAT: Şasi tablasi (base_link) ================= -->
   <link name="base_link">
     <visual>
       <geometry>
-        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+        <box size="${chassis_length} ${chassis_width} ${chassis_thickness}"/>
       </geometry>
       <material name="gemstone_gray"/>
     </visual>
     <collision>
       <geometry>
-        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
+        <box size="${chassis_length} ${chassis_width} ${chassis_thickness}"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="${chassis_mass}"/>
-      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.02" iyz="0.0" izz="0.02"/>
+      <inertia ixx="0.0034" ixy="0.0" ixz="0.0" iyy="0.0076" iyz="0.0" izz="0.0108"/>
     </inertial>
   </link>
 
-  <!-- ============================ Tahrik tekerleri ============================ -->
+  <!-- 3S LiPo pil: alt katin ortasinda -->
+  <link name="battery_link">
+    <visual>
+      <geometry>
+        <box size="${battery_length} ${battery_width} ${battery_height}"/>
+      </geometry>
+      <material name="battery_red"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${battery_length} ${battery_width} ${battery_height}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${battery_mass}"/>
+      <inertia ixx="0.00018" ixy="0.0" ixz="0.0" iyy="0.00042" iyz="0.0" izz="0.00058"/>
+    </inertial>
+  </link>
+
+  <joint name="battery_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="battery_link"/>
+    <origin xyz="0 0 ${battery_z}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===================== ALT KAT: Tahrik tekerleri ===================== -->
   <xacro:macro name="drive_wheel" params="prefix y_reflect">
     <link name="${prefix}_wheel_link">
       <visual>
@@ -109,7 +200,7 @@
   <xacro:drive_wheel prefix="left" y_reflect="1"/>
   <xacro:drive_wheel prefix="right" y_reflect="-1"/>
 
-  <!-- ============================ Misket (caster) teker ============================ -->
+  <!-- ===================== ALT KAT: Misket (caster) teker ===================== -->
   <link name="caster_wheel_link">
     <visual>
       <geometry>
@@ -134,45 +225,179 @@
     <origin xyz="${caster_x_offset} 0 ${caster_z_offset}" rpy="0 0 0"/>
   </joint>
 
-  <!-- ============================ Sensör çerçeveleri ============================ -->
-
-  <link name="imu_link">
+  <!-- ===================== ORTA KAT: platform tablasi ===================== -->
+  <link name="mid_plate_link">
+    <visual>
+      <geometry>
+        <box size="${mid_plate_length} ${mid_plate_width} ${mid_plate_thickness}"/>
+      </geometry>
+      <material name="gemstone_gray"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${mid_plate_length} ${mid_plate_width} ${mid_plate_thickness}"/>
+      </geometry>
+    </collision>
     <inertial>
-      <mass value="0.01"/>
-      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001"/>
+      <mass value="${mid_plate_mass}"/>
+      <inertia ixx="0.00222" ixy="0.0" ixz="0.0" iyy="0.00529" iyz="0.0" izz="0.00739"/>
     </inertial>
   </link>
 
-  <joint name="imu_joint" type="fixed">
+  <joint name="mid_plate_joint" type="fixed">
     <parent link="base_link"/>
-    <child link="imu_link"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <child link="mid_plate_link"/>
+    <origin xyz="0 0 ${mid_plate_z}" rpy="0 0 0"/>
   </joint>
 
-  <link name="lidar_link">
+  <!-- Gemstone O1 karti: orta katin uzerinde -->
+  <link name="gemstone_link">
+    <visual>
+      <geometry>
+        <box size="${board_length} ${board_width} ${board_thickness}"/>
+      </geometry>
+      <material name="pcb_green"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${board_length} ${board_width} ${board_thickness}"/>
+      </geometry>
+    </collision>
     <inertial>
-      <mass value="0.01"/>
-      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001"/>
+      <mass value="${board_mass}"/>
+      <inertia ixx="0.000016" ixy="0.0" ixz="0.0" iyy="0.000028" iyz="0.0" izz="0.000042"/>
+    </inertial>
+  </link>
+
+  <joint name="gemstone_joint" type="fixed">
+    <parent link="mid_plate_link"/>
+    <child link="gemstone_link"/>
+    <origin xyz="0 0 ${board_z}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Motor surucu: gemstone kartinin yaninda -->
+  <link name="motor_driver_link">
+    <visual>
+      <geometry>
+        <box size="${driver_length} ${driver_width} ${driver_thickness}"/>
+      </geometry>
+      <material name="driver_blue"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${driver_length} ${driver_width} ${driver_thickness}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${driver_mass}"/>
+      <inertia ixx="0.000008" ixy="0.0" ixz="0.0" iyy="0.000012" iyz="0.0" izz="0.000018"/>
+    </inertial>
+  </link>
+
+  <joint name="motor_driver_joint" type="fixed">
+    <parent link="mid_plate_link"/>
+    <child link="motor_driver_link"/>
+    <origin xyz="${driver_x} 0 ${driver_z}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===================== UST KAT: platform tablasi ===================== -->
+  <link name="top_plate_link">
+    <visual>
+      <geometry>
+        <box size="${top_plate_length} ${top_plate_width} ${top_plate_thickness}"/>
+      </geometry>
+      <material name="gemstone_gray"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${top_plate_length} ${top_plate_width} ${top_plate_thickness}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${top_plate_mass}"/>
+      <inertia ixx="0.00130" ixy="0.0" ixz="0.0" iyy="0.00244" iyz="0.0" izz="0.00370"/>
+    </inertial>
+  </link>
+
+  <joint name="top_plate_joint" type="fixed">
+    <parent link="mid_plate_link"/>
+    <child link="top_plate_link"/>
+    <origin xyz="0 0 ${top_plate_z}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- A1M8 lidar: ust katin uzerinde, en tepede -->
+  <link name="lidar_link">
+    <visual>
+      <geometry>
+        <cylinder radius="${lidar_radius}" length="${lidar_height}"/>
+      </geometry>
+      <material name="gemstone_black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${lidar_radius}" length="${lidar_height}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="${lidar_mass}"/>
+      <inertia ixx="0.000025" ixy="0.0" ixz="0.0" iyy="0.000025" iyz="0.0" izz="0.000034"/>
     </inertial>
   </link>
 
   <joint name="lidar_joint" type="fixed">
     <parent link="base_link"/>
     <child link="lidar_link"/>
-    <origin xyz="0 0 ${chassis_height/2 + 0.05}" rpy="0 0 0"/>
+    <origin xyz="0 0 ${lidar_z}" rpy="0 0 0"/>
   </joint>
 
+  <!-- ===================== Kamera (ust kat, onde) ===================== -->
   <link name="camera_link">
+    <visual>
+      <geometry>
+        <box size="0.03 0.02 0.02"/>
+      </geometry>
+      <material name="gemstone_black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.03 0.02 0.02"/>
+      </geometry>
+    </collision>
     <inertial>
-      <mass value="0.01"/>
-      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001"/>
+      <mass value="0.02"/>
+      <inertia ixx="0.0000013" ixy="0.0" ixz="0.0" iyy="0.0000013" iyz="0.0" izz="0.0000022"/>
     </inertial>
   </link>
 
   <joint name="camera_joint" type="fixed">
     <parent link="base_link"/>
     <child link="camera_link"/>
-    <origin xyz="${chassis_length/2} 0 ${chassis_height/2}" rpy="0 0 0"/>
+    <origin xyz="${camera_x} 0 ${camera_z}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===================== IMU (gemstone karti uzerinde) ===================== -->
+  <link name="imu_link">
+    <visual>
+      <geometry>
+        <box size="0.02 0.02 0.01"/>
+      </geometry>
+      <material name="gemstone_white"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.02 0.02 0.01"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="0.000001" ixy="0.0" ixz="0.0" iyy="0.000001" iyz="0.0" izz="0.000001"/>
+    </inertial>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 ${board_z + board_thickness/2 + 0.005}" rpy="0 0 0"/>
   </joint>
 
   <!-- ============================ Sensörler ============================ -->
