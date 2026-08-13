@@ -11,7 +11,8 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/params',
-            ['params/exploration_demo_params.yaml']),
+            ['params/exploration_demo_params.yaml',
+             'params/naive_avoidance_params.yaml']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -26,6 +27,8 @@ setup(
         'console_scripts': [
             'gemstone_exploration_demo_node = '
             'gemstone_exploration_demo.exploration_demo_node:main',
+            'naive_avoidance_node = '
+            'gemstone_exploration_demo.naive_avoidance_node:main',
         ],
     },
 )

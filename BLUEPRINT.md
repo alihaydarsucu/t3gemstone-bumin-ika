@@ -70,7 +70,11 @@ dogrudan baglaniyor (guc: harici 2S pil motoru besliyor, Gemstone sadece
 ### 3. Node Layer
 - `gemstone_image_proc`: görüntü işleme iskeleti (şu an passthrough)
 - `gemstone_exploration_demo`: LiDAR + motion state verisiyle çalışan,
-  timestamp kontrollü demo gezinti/planner davranışı
+  timestamp kontrollü demo gezinti/planner davranışı. Aynı pakette,
+  enansakib/obstacle-avoidance-turtlebot'tan portlanmış basit/öğretici bir
+  alternatif de var: `naive_avoidance_node` (varsayılan kapalı, bkz.
+  `enable_naive_avoidance`) -- ön ve ön-sol/ön-sağ mesafeye eşik
+  karşılaştırması yapıp git/dön kararı verir, durum makinesi kullanmaz.
 - `gemstone_motor_driver`: `/cmd_vel` -> motor GPIO sürüşü, isteğe bağlı
   encoder odometrisi ve IMU + wheel odom birleştiren hareket durumu yayını
 - `gemstone_obstacle_avoidance`: `/scan`'e bakıp ileri hızı sınırlayan karar node'u

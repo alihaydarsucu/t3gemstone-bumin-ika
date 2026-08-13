@@ -27,10 +27,19 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     pkg_share = get_package_share_directory('gemstone_lidar_bringup')
+    exploration_demo_share = get_package_share_directory('gemstone_exploration_demo')
+    naive_avoidance_params_file = os.path.join(
+        exploration_demo_share, 'params', 'naive_avoidance_params.yaml')
 
     enable_rplidar = DeclareLaunchArgument('enable_rplidar', default_value='true')
     enable_rf2o = DeclareLaunchArgument('enable_rf2o', default_value='true')
     enable_obstacle_avoidance = DeclareLaunchArgument('enable_obstacle_avoidance', default_value='true')
+    # Projenin asil otonom hareket davranisi gemstone_exploration_demo'daki
+    # durum makineli algoritma; bu, enansakib/obstacle-avoidance-turtlebot'tan
+    # portlanmis basit/ogretici bir alternatif -- varsayilan KAPALI. İkisini
+    # ayni anda acmayin, ikisi de cmd_vel_nav'a yazar, komutlar birbirine
+    # karisir.
+    enable_naive_avoidance = DeclareLaunchArgument('enable_naive_avoidance', default_value='false')
     enable_slam_toolbox = DeclareLaunchArgument('enable_slam_toolbox', default_value='false')
     enable_nav2 = DeclareLaunchArgument('enable_nav2', default_value='false')
 
@@ -98,6 +107,15 @@ def generate_launch_description():
         }],
     )
 
+    naive_avoidance_node = Node(
+        package='gemstone_exploration_demo',
+        executable='naive_avoidance_node',
+        name='naive_avoidance_node',
+        output='screen',
+        condition=IfCondition(LaunchConfiguration('enable_naive_avoidance')),
+        parameters=[naive_avoidance_params_file],
+    )
+
     slam_toolbox_launch = GroupAction(
         condition=IfCondition(LaunchConfiguration('enable_slam_toolbox')),
         actions=[
@@ -143,6 +161,7 @@ def generate_launch_description():
         enable_rplidar,
         enable_rf2o,
         enable_obstacle_avoidance,
+        enable_naive_avoidance,
         enable_slam_toolbox,
         enable_nav2,
         serial_port,
@@ -152,6 +171,7 @@ def generate_launch_description():
         rplidar_launch,
         rf2o_node,
         obstacle_avoidance_node,
+        naive_avoidance_node,
         slam_toolbox_launch,
         nav2_launch,
     ])
