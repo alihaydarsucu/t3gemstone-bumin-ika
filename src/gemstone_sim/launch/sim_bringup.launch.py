@@ -36,7 +36,7 @@ def generate_launch_description():
     sim_share = get_package_share_directory('gemstone_sim')
     exploration_demo_share = get_package_share_directory('gemstone_exploration_demo')
 
-    world_file = PathJoinSubstitution([sim_share, 'worlds', 'office.world'])
+    world_file = LaunchConfiguration('world_file')
     xacro_file = os.path.join(sim_share, 'urdf', 'gemstone_ugv_gazebo.xacro')
     motion_state_params = os.path.join(sim_share, 'config', 'motion_state_sim_params.yaml')
     exploration_params = os.path.join(
@@ -58,6 +58,16 @@ def generate_launch_description():
     y_pose = DeclareLaunchArgument('y_pose', default_value='0.0')
     z_pose = DeclareLaunchArgument('z_pose', default_value='0.075')
     yaw = DeclareLaunchArgument('yaw', default_value='0.0')
+    world_file_arg = DeclareLaunchArgument(
+        'world_file',
+        default_value=PathJoinSubstitution([sim_share, 'worlds', 'office.world']),
+        description='Gazebo dünya dosyasi (mutlak yol). Varsayilan: office.world.')
+    rviz_config_file_arg = DeclareLaunchArgument(
+        'rviz_config_file',
+        default_value=os.path.join(
+            get_package_share_directory('gemstone_frontier_explorer'),
+            'rviz', 'auto_mapping.rviz'),
+        description='RViz config dosyasinin mutlak yolu.')
 
     # --- Gazebo ---
     gazebo_ros_share = get_package_share_directory('gazebo_ros')
@@ -129,7 +139,12 @@ def generate_launch_description():
         executable='obstacle_avoidance_node',
         name='obstacle_avoidance_node',
         output='screen',
-        parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}],
+        parameters=[{
+            'use_sim_time': LaunchConfiguration('use_sim_time'),
+            # Kapali/dar ortam (ev) icin cok konservatif olmasin: ofis icin 0.4,
+            # ev kapilari (~0.9 m) icin 0.25 m guvenlik yeterli.
+            'safety_distance': 0.25,
+        }],
     )
 
     image_processing_node = Node(
@@ -147,6 +162,7 @@ def generate_launch_description():
         output='screen',
         condition=IfCondition(LaunchConfiguration('enable_rviz')),
         parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}],
+        arguments=['-d', LaunchConfiguration('rviz_config_file')],
     )
 
     return LaunchDescription([
@@ -158,6 +174,8 @@ def generate_launch_description():
         y_pose,
         z_pose,
         yaw,
+        world_file_arg,
+        rviz_config_file_arg,
         gzserver,
         start_gzclient,
         robot_state_publisher,

@@ -48,11 +48,22 @@ def generate_launch_description():
 
     use_sim_time = LaunchConfiguration('use_sim_time')
     enable_rviz = LaunchConfiguration('enable_rviz')
+    world_file = LaunchConfiguration(
+        'world_file',
+        default=os.path.join(
+            get_package_share_directory('gemstone_sim'),
+            'worlds', 'office.world'))
 
     declare_use_sim_time = DeclareLaunchArgument(
         'use_sim_time', default_value='true')
     declare_enable_rviz = DeclareLaunchArgument(
         'enable_rviz', default_value='true')
+    declare_world_file = DeclareLaunchArgument(
+        'world_file',
+        default_value=os.path.join(
+            get_package_share_directory('gemstone_sim'),
+            'worlds', 'office.world'),
+        description='Gazebo dünya dosyasi (mutlak yol). Varsayilan: office.world.')
 
     sim_bringup = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(_launch_path('gemstone_sim', 'sim_bringup.launch.py')),
@@ -60,10 +71,14 @@ def generate_launch_description():
             'use_sim_time': use_sim_time,
             'enable_exploration_demo': 'false',
             'enable_rviz': enable_rviz,
-            'x_pose': LaunchConfiguration('x_pose', default='0.0'),
-            'y_pose': LaunchConfiguration('y_pose', default='0.0'),
+            'world_file': world_file,
+            'x_pose': LaunchConfiguration('x_pose', default='-3.0'),
+            'y_pose': LaunchConfiguration('y_pose', default='2.0'),
             'z_pose': LaunchConfiguration('z_pose', default='0.075'),
-            'yaw': LaunchConfiguration('yaw', default='0.0'),
+            'yaw': LaunchConfiguration('yaw', default='1.5708'),
+            'rviz_config_file': os.path.join(
+                get_package_share_directory('gemstone_frontier_explorer'),
+                'rviz', 'auto_mapping.rviz'),
         }.items(),
     )
 
@@ -93,6 +108,7 @@ def generate_launch_description():
     return LaunchDescription([
         declare_use_sim_time,
         declare_enable_rviz,
+        declare_world_file,
         sim_bringup,
         lidar_bringup,
         explorer_node,

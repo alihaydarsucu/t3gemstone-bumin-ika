@@ -10,7 +10,7 @@ data_files = [
 ]
 params_dir = os.path.join('share', package_name, 'params')
 launch_dir = os.path.join('share', package_name, 'launch')
-for d in ('params', 'launch'):
+for d in ('params', 'launch', 'rviz'):
     base = os.path.join(os.path.dirname(__file__), d)
     files = []
     for f in os.listdir(base):
