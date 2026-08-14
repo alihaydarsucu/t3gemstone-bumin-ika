@@ -2,12 +2,12 @@ slam_toolbox:
   ros__parameters:
     # Genel slam_toolbox online_async ayarlari. Tam parametre listesi icin:
     # https://github.com/SteveMacenski/slam_toolbox
+    # NOT: use_sim_time launch'tan override edilir (hardware:false, sim:true).
     odom_frame: odom
     map_frame: map
     base_frame: base_link
     scan_topic: /scan
     mode: mapping           # mapping | localization
-    use_sim_time: false
 
     resolution: 0.05
     max_laser_range: 12.0    # RPLIDAR A1M8 azami menzili ~12m

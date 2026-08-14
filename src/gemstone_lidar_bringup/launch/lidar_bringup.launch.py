@@ -42,6 +42,8 @@ def generate_launch_description():
     enable_naive_avoidance = DeclareLaunchArgument('enable_naive_avoidance', default_value='false')
     enable_slam_toolbox = DeclareLaunchArgument('enable_slam_toolbox', default_value='false')
     enable_nav2 = DeclareLaunchArgument('enable_nav2', default_value='false')
+    # Gercek donanimda use_sim_time:=false; Gazebo simülasyonunda true.
+    use_sim_time = DeclareLaunchArgument('use_sim_time', default_value='false')
 
     serial_port = DeclareLaunchArgument('lidar_serial_port', default_value='/dev/ttyUSB0')
     frame_id = DeclareLaunchArgument('lidar_frame_id', default_value='lidar_link')
@@ -128,7 +130,7 @@ def generate_launch_description():
                 ),
                 launch_arguments={
                     'slam_params_file': os.path.join(pkg_share, 'params', 'slam_toolbox_mapping.yaml'),
-                    'use_sim_time': 'false',
+                    'use_sim_time': LaunchConfiguration('use_sim_time'),
                 }.items(),
             )
         ],
@@ -151,7 +153,7 @@ def generate_launch_description():
                     # Nav2'nin kendi slam_toolbox'ini tekrar baslatmasini
                     # istemiyoruz.
                     'slam': 'false',
-                    'use_sim_time': 'false',
+                    'use_sim_time': LaunchConfiguration('use_sim_time'),
                 }.items(),
             )
         ],
@@ -164,6 +166,7 @@ def generate_launch_description():
         enable_naive_avoidance,
         enable_slam_toolbox,
         enable_nav2,
+        use_sim_time,
         serial_port,
         frame_id,
         nav2_params_file,
