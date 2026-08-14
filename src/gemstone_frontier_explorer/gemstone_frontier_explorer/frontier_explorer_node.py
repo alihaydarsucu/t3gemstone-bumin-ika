@@ -63,7 +63,10 @@ class FrontierExplorerNode(Node):
 
     def __init__(self):
         super().__init__('frontier_explorer_node')
-        self.declare_parameter('use_sim_time', False)
+        # use_sim_time: launch'in --params-file'i uzerinden rclpy tarafindan
+        # otomatik bildirilir (automatically_declare_parameters_from_overrides).
+        # Burada tekrar declare etmek ParameterAlreadyDeclaredException'a yol
+        # acar; saat zaten get_clock() uzerinden use_sim_time'i okur.
         self.declare_parameter('map_topic', '/map')
         self.declare_parameter('map_frame', 'map')
         self.declare_parameter('base_frame', 'base_link')

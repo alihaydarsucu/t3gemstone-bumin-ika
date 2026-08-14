@@ -7,7 +7,8 @@
 
 frontier_explorer_node:
   ros__parameters:
-    use_sim_time: False
+    # use_sim_time launch uzerinden verilir (yaml'da tutulmaz; yoksa node'un
+    # declare_parameter('use_sim_time') cagrisi cift bildirimle patlar).
 
     # --- Topik / frame ---
     map_topic: /map
@@ -28,11 +29,12 @@ frontier_explorer_node:
     robot_snap_radius_m: 1.0
 
     # --- Kesif sinirlari (harita kutusu) ---
+    # House dünyası duvarlari x[-7.58, 7.58], y[-5.35, 5.28] araliginda.
     bounds_enabled: True
-    bounds_min_x: -6.0
-    bounds_max_x: 6.0
-    bounds_min_y: -4.0
-    bounds_max_y: 4.0
+    bounds_min_x: -8.0
+    bounds_max_x: 8.0
+    bounds_min_y: -6.0
+    bounds_max_y: 6.0
 
     # --- Yonetici (FrontierManagerParams) ---
     merge_radius_m: 1.0
