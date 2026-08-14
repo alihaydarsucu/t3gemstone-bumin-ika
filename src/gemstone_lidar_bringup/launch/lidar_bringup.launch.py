@@ -51,11 +51,10 @@ def generate_launch_description():
     nav2_params_file = DeclareLaunchArgument(
         'nav2_params_file',
         default_value=os.path.join(pkg_share, 'params', 'nav2_params.yaml'),
-        description='bkz. params/nav2_overrides.md -- bu dosyayi nav2_bringup varsayilanindan turetin')
-    nav2_map_yaml = DeclareLaunchArgument(
-        'map', default_value='',
-        description='Onceden cikarilmis bir harita varsa yaml yolu; bossa ve '
-                     'enable_slam_toolbox:=true ise slam_toolbox canli harita saglar')
+        description='Nav2 params yolu (bkz. params/nav2_overrides.md)')
+    nav2_cmd_vel_topic = DeclareLaunchArgument(
+        'nav2_cmd_vel_topic', default_value='cmd_vel_nav',
+        description="Nav2 hiz cikti topic'i (guvenlik katmaninin giris topic'i)")
 
     rplidar_launch = GroupAction(
         condition=IfCondition(LaunchConfiguration('enable_rplidar')),
@@ -142,18 +141,14 @@ def generate_launch_description():
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
                     PathJoinSubstitution([
-                        get_package_share_directory('nav2_bringup'),
-                        'launch', 'bringup_launch.py',
+                        pkg_share,
+                        'launch', 'nav2_launch.py',
                     ])
                 ),
                 launch_arguments={
                     'params_file': LaunchConfiguration('nav2_params_file'),
-                    'map': LaunchConfiguration('map'),
-                    # slam_toolbox'i kendi instance'imizdan yonetiyoruz;
-                    # Nav2'nin kendi slam_toolbox'ini tekrar baslatmasini
-                    # istemiyoruz.
-                    'slam': 'false',
                     'use_sim_time': LaunchConfiguration('use_sim_time'),
+                    'cmd_vel_topic': LaunchConfiguration('nav2_cmd_vel_topic'),
                 }.items(),
             )
         ],
@@ -170,7 +165,7 @@ def generate_launch_description():
         serial_port,
         frame_id,
         nav2_params_file,
-        nav2_map_yaml,
+        nav2_cmd_vel_topic,
         rplidar_launch,
         rf2o_node,
         obstacle_avoidance_node,
