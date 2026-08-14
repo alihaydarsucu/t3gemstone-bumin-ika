@@ -1,0 +1,55 @@
+# gemstone_frontier_explorer parametre dosyasi
+#
+# Kesif (exploration) davranisinin tum esikleri ve agirliklari burada
+# toplanir. Değerler robot ozelliklerine (footprint ~0.30x0.20 m, lidar
+# menzili) gore secilmistir. Sim/hw arasi farkli ayar gerektiren degerler
+# launch icinde ezilebilir.
+
+frontier_explorer_node:
+  ros__parameters:
+    use_sim_time: False
+
+    # --- Topik / frame ---
+    map_topic: /map
+    map_frame: map
+    base_frame: base_link
+    map_save_service: /slam_toolbox/save_map
+    action_name: /navigate_to_pose
+
+    # --- Cevrim ---
+    detect_period: 1.0          # sn; her periyotta map + tf okunup deteksiyon
+    publish_period: 1.0         # sn; marker/status yayin periyodu
+
+    # --- Detektor (FrontierDetectorParams) ---
+    cluster_min_cells: 8        # en az kume boyutu (hucre)
+    border_margin_cells: 2      # tohumlardan kenar halkasi (hucre)
+    obstacle_clearance_cells: 1 # engelden uzaklik filtre (hucre)
+    unknown_bridge_cells: 1     # BFS'in art arda gecis yapacagi UNKNOWN sayisi
+    robot_snap_radius_m: 1.0
+
+    # --- Kesif sinirlari (harita kutusu) ---
+    bounds_enabled: True
+    bounds_min_x: -6.0
+    bounds_max_x: 6.0
+    bounds_min_y: -4.0
+    bounds_max_y: 4.0
+
+    # --- Yonetici (FrontierManagerParams) ---
+    merge_radius_m: 1.0
+    centroid_ema_alpha: 0.5
+    visit_radius_m: 0.6
+    visit_dwell_sec: 1.5
+    max_frontiers: 500
+
+    # --- Secim ---
+    w_size: 1.0
+    w_dist: 2.0
+    size_ref_m2: 5.0
+    dist_ref_m: 25.0
+    goal_select_threshold: -1.0e9
+    commit_margin: 0.05
+    pursuit_timeout_min_sec: 10.0
+    goal_snap_radius_m: 0.5
+
+    # --- Kapsam / bitis ---
+    coverage_threshold: 0.99    # bu orana ulasilinca kesif biter

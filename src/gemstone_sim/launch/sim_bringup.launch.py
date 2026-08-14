@@ -49,6 +49,11 @@ def generate_launch_description():
     use_sim_time = DeclareLaunchArgument('use_sim_time', default_value='true')
     enable_gui = DeclareLaunchArgument('enable_gui', default_value='true')
     enable_rviz = DeclareLaunchArgument('enable_rviz', default_value='false')
+    enable_exploration_demo = DeclareLaunchArgument(
+        'enable_exploration_demo', default_value='true',
+        description='Eski reaktif exploration_demo_node\'i calistirir. '
+                    'Otonom kesif (auto_mapping) modunda false verilir, '
+                    'cunku frontier_explorer_node da cmd_vel_nav\'a yazar.')
     x_pose = DeclareLaunchArgument('x_pose', default_value='0.0')
     y_pose = DeclareLaunchArgument('y_pose', default_value='0.0')
     z_pose = DeclareLaunchArgument('z_pose', default_value='0.075')
@@ -115,6 +120,7 @@ def generate_launch_description():
         executable='gemstone_exploration_demo_node',
         name='gemstone_exploration_demo_node',
         output='screen',
+        condition=IfCondition(LaunchConfiguration('enable_exploration_demo')),
         parameters=[exploration_params, {'use_sim_time': LaunchConfiguration('use_sim_time')}],
     )
 
@@ -147,6 +153,7 @@ def generate_launch_description():
         use_sim_time,
         enable_gui,
         enable_rviz,
+        enable_exploration_demo,
         x_pose,
         y_pose,
         z_pose,
