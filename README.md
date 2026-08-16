@@ -61,10 +61,32 @@ sayfasına bakın:
 
 ```bash
 cd /ros_ws && source /opt/ros/humble/setup.bash
-colcon build --symlink-install --packages-select gemstone_sim
+colcon build --symlink-install \
+  --packages-select gemstone_sim gemstone_frontier_explorer \
+  gemstone_lidar_bringup gemstone_obstacle_avoidance
 source install/setup.bash
 ros2 launch gemstone_sim sim_bringup.launch.py
 ```
+
+> Not: `sim_bringup`'ın RViz default config'i `gemstone_frontier_explorer`
+> paketinden geldiği ve obstacle/lidar paketlerini başlattığı için tek paket
+> yerine yukarıdaki set build edilir.
+
+## Otonom Haritalama (auto_mapping)
+
+Ev dünyasında (`house.world`) tam otonom kesif ve harita çıkarma için
+`gemstone_frontier_explorer` paketi kullanılır: Gazebo + slam_toolbox +
+Nav2 + frontier keşfi tek launch'ta başlar, robot evi kendi kendine
+dolaşır ve haritayı kaydeder.
+
+```bash
+ros2 launch gemstone_frontier_explorer auto_mapping.launch.py \
+  world_file:=/ros_ws/install/gemstone_sim/share/gemstone_sim/worlds/house.world \
+  enable_rviz:=true
+```
+
+Ayrıntılı akış (keşfe başlatma, izleme, harita kaydetme, video kaydı) için
+[docs/tr/ev-haritalama.md](docs/tr/ev-haritalama.md) bölümüne bakın.
 
 <video controls width="100%">
   <source src="https://raw.githubusercontent.com/alitalhq/t3gemstone-bumin-ika-docs/main/docs/assets/sim/sim-office-exploration.mp4" type="video/mp4">
@@ -83,6 +105,7 @@ ros2 launch gemstone_sim sim_bringup.launch.py
 |---|---|
 | Bringup | Tek launch ile çalışıyor |
 | Simülasyon | Gazebo ofis dünyası + gemstone node'ları |
+| Otonom haritalama | Ev dünyası + frontier keşfi (`auto_mapping`) |
 | Dokümantasyon | Ayrıntılı içerik docs reposunda |
 | Dil desteği | TR / EN girişleri mevcut |
 

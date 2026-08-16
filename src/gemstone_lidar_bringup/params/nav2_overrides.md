@@ -1,33 +1,37 @@
 # Nav2 parametreleri hakkinda not
 
-Tam bir `nav2_params.yaml` (300+ satir, costmap katmanlari, controller/planner
-plugin ayarlari vb.) elle sifirdan yazip repoya koymak yerine, Nav2'nin kendi
-`nav2_bringup` paketiyle gelen varsayilan `params/nav2_params.yaml` dosyasini
-baz almanizi oneriyoruz -- o dosya zaten test edilmis ve guncel tutuluyor;
-elle yeniden yazmak ince hatalara (yanlis plugin adi, eksik alan vb.) acik.
+`nav2_params.yaml` artik repoda **mevcut ve guncel**: Humble stok
+`nav2_bringup` `params/nav2_params.yaml` dosyasindan turetilmis, bu projeye
+ozel degisikliklerle birlikte `gemstone_lidar_bringup/params/nav2_params.yaml`
+olarak tutuluyor ve `lidar_bringup.launch.py` / `auto_mapping.launch.py`
+tarafindan kullaniliyor.
 
-## Yapmaniz gereken
+## Projeye ozel yapilan degisiklikler
 
-1. `ros2 pkg prefix nav2_bringup` ile paketin kurulu yerini bulun, altindaki
-   `share/nav2_bringup/params/nav2_params.yaml` dosyasini bu klasore
-   (`gemstone_lidar_bringup/params/nav2_params.yaml`) kopyalayin.
-2. Bu projeye ozel degistirmeniz gereken alanlar:
-   - `robot_radius`: aracinizin gercek yaricapi (metre) -- costmap'lerde
-     (`local_costmap` ve `global_costmap` altinda, `inflation_layer` ve
-     `obstacle_layer`/`static_layer` civarinda).
-   - `controller_server` altinda `max_vel_x`, `max_vel_theta`,
-     `min_vel_x`, `acc_lim_x`: `gemstone_motor_driver`'daki
-     `max_wheel_speed` parametresiyle tutarli olmali.
-   - `robot_base_frame: base_link`, `odom_topic: /odom_rf2o` (rf2o'nun
-     yayinladigi topic ile eslesmeli, bkz. lidar_bringup.launch.py).
-   - Diferansiyel surus oldugumuz icin controller plugin olarak
-     `DWB` (varsayilan) veya `RegulatedPurePursuit` kullanilabilir; Ackermann'a
-     ozel plugin gerekmiyor.
-3. `enable_nav2:=true` ile launch ederken
-   `params_file:=<bu_dosyanin_tam_yolu>` argumanini gecin (bkz.
-   `lidar_bringup.launch.py`).
+- `controller_server` DWB: `max_vel_x: 0.22`, `max_vel_theta: 0.6`,
+  `acc_lim_x: 1.2`, `acc_lim_theta: 1.5` — dar/hafif robot mobilya
+  bacaklarina carptiginda ters dönmesin diye dusuruldu
+  (bkz. `docs/tr/ev-haritalama.md`).
+- `robot_base_frame: base_link`, `robot_radius` costmap'lerde robot
+  yaricapina gore ayarli.
+- `odom_topic` Nav2'ye **launch argumani** ile verilir:
+  - Donanim: `/odom_rf2o` (rf2o_laser_odometry)
+  - Gazebo sim: `/odom` (diff_drive)
+- Diferansiyel surus oldugumuz icin controller plugin olarak
+  `DWB` kullaniliyor.
+- `map_server` / `map_saver` / `amcl` / `velocity_smoother` baslatilmiyor:
+  haritayi slam_toolbox `/map` saglar, harita kaydini
+  `frontier_explorer_node`'un `/exploration/save_map` servisi yapar, hiz
+  guvenligini `obstacle_avoidance_node` yapar.
 
-Bu adimi siz (veya ben, karta baglanip `nav2_bringup`in kurulu oldugu
-ortamda) birlikte yapabiliriz -- simdilik launch dosyasi bu params_file'i
-bir launch argumanindan okuyacak sekilde hazir, sadece dosyanin kendisi
-eksik.
+## Degisiklik akisi
+
+Parametre degisikliginden sonra paketi yeniden build etmeye gerek yok
+(`--symlink-install` sayesinde yaml dogrudan okunur), sadece launch'i
+yeniden baslatmak yeterli:
+
+```bash
+pkill -9 -f gzserver; pkill -9 -f gzclient
+ros2 launch gemstone_frontier_explorer auto_mapping.launch.py \
+  world_file:=/ros_ws/install/gemstone_sim/share/gemstone_sim/worlds/house.world
+```
