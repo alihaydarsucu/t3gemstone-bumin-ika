@@ -7,8 +7,8 @@
 
 frontier_explorer_node:
   ros__parameters:
-    # use_sim_time launch uzerinden verilir (yaml'da tutulmaz; yoksa node'un
-    # declare_parameter('use_sim_time') cagrisi cift bildirimle patlar).
+    # use_sim_time launch uzerinden verilir (yaml'da tutulmaz; rclpy TimeSource
+    # otomatik bildirir, node icinde tekrar declare edilmez).
 
     # --- Topik / frame ---
     map_topic: /map

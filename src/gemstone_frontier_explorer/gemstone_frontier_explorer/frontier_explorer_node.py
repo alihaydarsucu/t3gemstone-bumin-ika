@@ -63,9 +63,8 @@ class FrontierExplorerNode(Node):
 
     def __init__(self):
         super().__init__('frontier_explorer_node')
-        # use_sim_time: launch'in --params-file'i uzerinden rclpy tarafindan
-        # otomatik bildirilir (automatically_declare_parameters_from_overrides).
-        # Burada tekrar declare etmek ParameterAlreadyDeclaredException'a yol
+        # use_sim_time: launch'ten --params-file ile verilir (rclpy TimeSource
+        # otomatik bildirir). Burada tekrar declare etmek cift bildirime yol
         # acar; saat zaten get_clock() uzerinden use_sim_time'i okur.
         self.declare_parameter('map_topic', '/map')
         self.declare_parameter('map_frame', 'map')
@@ -81,10 +80,12 @@ class FrontierExplorerNode(Node):
         self.declare_parameter('unknown_bridge_cells', 1)
         self.declare_parameter('robot_snap_radius_m', 1.0)
         self.declare_parameter('bounds_enabled', True)
-        self.declare_parameter('bounds_min_x', -6.0)
-        self.declare_parameter('bounds_max_x', 6.0)
-        self.declare_parameter('bounds_min_y', -4.0)
-        self.declare_parameter('bounds_max_y', 4.0)
+        # Varsayilanlar params/frontier_explorer.yaml ile uyumlu tutulur
+        # (ev duvarlari x[-7.58,7.58], y[-5.35,5.28]).
+        self.declare_parameter('bounds_min_x', -8.0)
+        self.declare_parameter('bounds_max_x', 8.0)
+        self.declare_parameter('bounds_min_y', -6.0)
+        self.declare_parameter('bounds_max_y', 6.0)
 
         self.declare_parameter('merge_radius_m', 1.0)
         self.declare_parameter('centroid_ema_alpha', 0.5)

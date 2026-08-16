@@ -64,6 +64,10 @@ def generate_launch_description():
             get_package_share_directory('gemstone_sim'),
             'worlds', 'office.world'),
         description='Gazebo dünya dosyasi (mutlak yol). Varsayilan: office.world.')
+    declare_x_pose = DeclareLaunchArgument('x_pose', default_value='-3.0')
+    declare_y_pose = DeclareLaunchArgument('y_pose', default_value='2.0')
+    declare_z_pose = DeclareLaunchArgument('z_pose', default_value='0.075')
+    declare_yaw = DeclareLaunchArgument('yaw', default_value='1.5708')
 
     sim_bringup = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(_launch_path('gemstone_sim', 'sim_bringup.launch.py')),
@@ -72,10 +76,10 @@ def generate_launch_description():
             'enable_exploration_demo': 'false',
             'enable_rviz': enable_rviz,
             'world_file': world_file,
-            'x_pose': LaunchConfiguration('x_pose', default='-3.0'),
-            'y_pose': LaunchConfiguration('y_pose', default='2.0'),
-            'z_pose': LaunchConfiguration('z_pose', default='0.075'),
-            'yaw': LaunchConfiguration('yaw', default='1.5708'),
+            'x_pose': LaunchConfiguration('x_pose'),
+            'y_pose': LaunchConfiguration('y_pose'),
+            'z_pose': LaunchConfiguration('z_pose'),
+            'yaw': LaunchConfiguration('yaw'),
             'rviz_config_file': os.path.join(
                 get_package_share_directory('gemstone_frontier_explorer'),
                 'rviz', 'auto_mapping.rviz'),
@@ -94,6 +98,7 @@ def generate_launch_description():
             'enable_nav2': 'true',
             'nav2_params_file': nav2_params,
             'nav2_cmd_vel_topic': 'cmd_vel_nav',
+            'odom_topic': '/odom',
         }.items(),
     )
 
@@ -109,6 +114,10 @@ def generate_launch_description():
         declare_use_sim_time,
         declare_enable_rviz,
         declare_world_file,
+        declare_x_pose,
+        declare_y_pose,
+        declare_z_pose,
+        declare_yaw,
         sim_bringup,
         lidar_bringup,
         explorer_node,

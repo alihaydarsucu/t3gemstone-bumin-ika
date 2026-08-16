@@ -55,6 +55,11 @@ def generate_launch_description():
     nav2_cmd_vel_topic = DeclareLaunchArgument(
         'nav2_cmd_vel_topic', default_value='cmd_vel_nav',
         description="Nav2 hiz cikti topic'i (guvenlik katmaninin giris topic'i)")
+    # Nav2'nin kullanacagi odometri kaynagi. Gercek donanimda rf2o
+    # (/odom_rf2o), Gazebo simülasyonunda diff_drive (/odom) gecer.
+    nav2_odom_topic = DeclareLaunchArgument(
+        'odom_topic', default_value='/odom_rf2o',
+        description="Nav2 bt_navigator odom_topic (sim: /odom, donanim: /odom_rf2o)")
 
     rplidar_launch = GroupAction(
         condition=IfCondition(LaunchConfiguration('enable_rplidar')),
@@ -149,6 +154,7 @@ def generate_launch_description():
                     'params_file': LaunchConfiguration('nav2_params_file'),
                     'use_sim_time': LaunchConfiguration('use_sim_time'),
                     'cmd_vel_topic': LaunchConfiguration('nav2_cmd_vel_topic'),
+                    'odom_topic': LaunchConfiguration('odom_topic'),
                 }.items(),
             )
         ],
@@ -166,6 +172,7 @@ def generate_launch_description():
         frame_id,
         nav2_params_file,
         nav2_cmd_vel_topic,
+        nav2_odom_topic,
         rplidar_launch,
         rf2o_node,
         obstacle_avoidance_node,

@@ -3,10 +3,13 @@
 # Humble stok nav2_bringup params'larindan turetilmistir ama yalnizca
 # nav2_launch.py'nin baslattigi sunucular icin gerekli bolumler tutuldu:
 #   controller_server, local_costmap, global_costmap, smoother_server,
-#   planner_server, behavior_server, bt_navigator, waypoint_follower, map_saver.
-# Kaldirilanlar: amcl, map_server, velocity_smoother, robot_state_publisher
+#   planner_server, behavior_server, bt_navigator, waypoint_follower.
+# Kaldirilanlar: amcl, map_server, map_saver, velocity_smoother,
+# robot_state_publisher
 # (slam_toolbox haritayi /map'ten saglar; hiz guvenligini obstacle_avoidance_node
-# yapar). Ayrica Nav2 ciktisini yavaslatmamak icin velocity_smoother baslatilmaz.
+# yapar; harita kaydi frontier_explorer_node'un /exploration/save_map servisiyle
+# slam_toolbox /save_map'e gider). Ayrica Nav2 ciktisini yavaslatmamak icin
+# velocity_smoother baslatilmaz.
 #
 # Donanim icin:
 #   - odom_topic: /odom_rf2o   (rf2o_laser_odometry)
@@ -16,8 +19,9 @@
 # Buradaki use_sim_time degeri launch tarafindan ezilir.
 #
 # Hiz limitleri motor surucusuyle uyumludur:
-#   max_linear_speed 0.28 m/s, max_angular_speed 0.9 rad/s
-# (bkz. gemstone_exploration_demo exploration_demo.py).
+#   max_linear_speed 0.22 m/s, max_angular_speed 0.6 rad/s
+# (dar/hafif robot mobilya bacaklarina carptiginda ters dönmesin diye
+# ofis degerlerinden dusuruldu; bkz. docs/tr/ev-haritalama.md).
 
 controller_server:
   ros__parameters:
@@ -276,11 +280,3 @@ waypoint_follower:
       plugin: "nav2_waypoint_follower::WaitAtWaypoint"
       enabled: True
       waypoint_pause_duration: 200
-
-map_saver:
-  ros__parameters:
-    use_sim_time: False
-    save_map_timeout: 5.0
-    free_thresh_default: 0.25
-    occupied_thresh_default: 0.65
-    map_subscribe_transient_local: True
