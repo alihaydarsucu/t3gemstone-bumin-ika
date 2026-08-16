@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gemstone GCS</title>
+  <link rel="stylesheet" href="gcs.css">
+</head>
+<body>
+  <header>
+    <h1>Gemstone GCS</h1>
+    <div id="conn">
+      <label>Rosbridge</label>
+      <input id="host" value="localhost" title="rosbridge host">
+      <input id="port" value="9090" title="rosbridge port">
+      <button id="connect">Bağlan</button>
+      <span id="conn-state" class="off">Kapalı</span>
+    </div>
+  </header>
+
+  <main>
+    <section id="map-panel">
+      <h2>Harita</h2>
+      <canvas id="map-canvas" width="800" height="600"></canvas>
+      <div class="legend">
+        <span class="sw free"></span> Boş
+        <span class="sw wall"></span> Duvar
+        <span class="sw unk"></span> Bilinmeyen
+      </div>
+    </section>
+
+    <section id="right-col">
+      <section id="cam-panel">
+        <h2>Kamera</h2>
+        <img id="camera" alt="kamera akışı" title="web_video_server MJPEG">
+        <div class="cam-url">
+          <input id="cam-topic" value="/camera/image_raw">
+          <button id="cam-apply">Akışı Aç</button>
+        </div>
+      </section>
+
+      <section id="teleop-panel">
+        <h2>Teleop</h2>
+        <div class="grid">
+          <button data-dx="0"   data-dy="1"   class="k">▲</button>
+          <button data-dx="-1"  data-dy="0"  class="k">◀</button>
+          <button data-dx="0"   data-dy="-1" class="k">▼</button>
+          <button data-dx="1"   data-dy="0"  class="k">▶</button>
+        </div>
+        <div class="controls">
+          <label>Hız (m/s): <input id="vel-x" type="range" min="0.05" max="0.22" step="0.01" value="0.10"></label>
+          <label>Dönüş (rad/s): <input id="vel-th" type="range" min="0.1" max="0.6" step="0.05" value="0.30"></label>
+          <button id="stop">DUR</button>
+        </div>
+        <p class="hint">Klavye: WASD / ok tuşları, boşluk = dur. Teleop <b>/cmd_vel</b>'e yazar
+          (güvenlik katmanını bypass eder).</p>
+      </section>
+
+      <section id="explore-panel">
+        <h2>Keşif</h2>
+        <div class="explore-btns">
+          <button id="start" class="go">Kesife Basla</button>
+          <button id="stopx" class="warn">Durdur</button>
+          <button id="save">Harita Kaydet</button>
+        </div>
+        <div class="status">
+          <span class="lbl">Durum:</span> <span id="status-val">—</span>
+          <span class="lbl">Kapsam:</span> <span id="coverage-val">—</span>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <span id="log"></span>
+  </footer>
+
+  <script src="vendor/roslib.js"></script>
+  <script src="gcs.js"></script>
+</body>
+</html>
