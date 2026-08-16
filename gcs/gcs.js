@@ -94,16 +94,15 @@ function drawMap() {
 
   const w = mapImage.width;
   const h = mapImage.height;
+  // Canvas sabit iç çözünürlükte kalır (800x600). Harita bu alana ölçeklenir.
   const scale = Math.min(canvas.width / w, canvas.height / h);
-  canvas.width = Math.max(2, Math.floor(w * scale));
-  canvas.height = Math.max(2, Math.floor(h * scale));
 
   const img = ctx.createImageData(canvas.width, canvas.height);
   const d = img.data;
   for (let y = 0; y < canvas.height; y++) {
-    const srcY = Math.floor(y / scale);
+    const srcY = Math.min(h - 1, Math.floor(y / scale));
     for (let x = 0; x < canvas.width; x++) {
-      const srcX = Math.floor(x / scale);
+      const srcX = Math.min(w - 1, Math.floor(x / scale));
       const v = mapImage.data[srcY * w + srcX];
       let c;
       if (v === -1) c = [128, 128, 128, 255];      // bilinmeyen
@@ -153,18 +152,22 @@ function drawRobot(scale) {
   const p = worldToPx(robotPose.x, robotPose.y);
   const cx = p.x * scale;
   const cy = p.y * scale;
+  // Robot gerçek dünya boyutuyla çizilir (yarıçap ~0.10 m, ok ~0.20 m) ki
+  // harita büyüdükçe/zoom-out olunca robot da orantılı küçülsün.
+  const radiusPx = (0.10 / mapImage.resolution) * scale;
+  const lenPx = (0.22 / mapImage.resolution) * scale;
   ctx.save();
   ctx.translate(cx, cy);
   ctx.rotate(-robotPose.th);  // ekran y ekseni çevrili olduğu için eksi
   ctx.fillStyle = 'rgba(79, 195, 247, 0.9)';
   ctx.beginPath();
-  ctx.arc(0, 0, 5, 0, Math.PI * 2);
+  ctx.arc(0, 0, radiusPx, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = Math.max(1, scale * 0.3);
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(10, 0);
+  ctx.lineTo(lenPx, 0);
   ctx.stroke();
   ctx.restore();
 }
@@ -177,7 +180,7 @@ function sendVel(linear, angular) {
   if (!velTopic) {
     velTopic = new ROSLIB.Topic({
       ros,
-      name: '/cmd_vel',
+      name: '/cmd_vel_nav',
       messageType: 'geometry_msgs/msg/Twist',
     });
   }
@@ -193,6 +196,19 @@ function currentSpeed() {
 }
 
 let keyInterval = null;
+let kbActive = false;   // klavye teleop'u ancak 'Klavye Kontrolünü Aç' tıklandığında çalışır
+
+function setKbActive(on) {
+  kbActive = on;
+  const b = $('kb-toggle');
+  b.textContent = on ? 'Klavye Kontrolünü Kapat' : 'Klavye Kontrolünü Aç';
+  b.className = on ? 'active' : '';
+  const s = $('kb-state');
+  s.textContent = on ? 'Klavye aktif — ok tuşlarıyla sür' : 'Klavye kapalı';
+  s.className = on ? 'on' : 'off';
+  if (!on) stopKey();
+}
+
 function startKey(dx, dy) {
   stopKey();
   const { v, th } = currentSpeed();
@@ -227,6 +243,7 @@ document.querySelectorAll('.grid .k').forEach((btn) => {
 });
 
 window.addEventListener('keydown', (e) => {
+  if (!kbActive) return;
   if (e.target.tagName === 'INPUT') return;
   const map = {
     ArrowUp: [0, 1], w: [0, 1], W: [0, 1],
@@ -239,10 +256,13 @@ window.addEventListener('keydown', (e) => {
   if (e.key === ' ') { e.preventDefault(); stopKey(); }
 });
 window.addEventListener('keyup', (e) => {
+  if (!kbActive) return;
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 's', 'S', 'a', 'A', 'd', 'D'].includes(e.key)) {
     stopKey();
   }
 });
+
+$('kb-toggle').addEventListener('click', () => setKbActive(!kbActive));
 
 $('stop').addEventListener('click', () => { stopKey(); sendVel(0, 0); });
 $('start').addEventListener('click', () => callService('/exploration/start'));
@@ -250,5 +270,5 @@ $('stopx').addEventListener('click', () => callService('/exploration/stop'));
 $('save').addEventListener('click', () => callService('/exploration/save_map'));
 $('cam-apply').addEventListener('click', () => {
   const topic = $('cam-topic').value.trim();
-  $('camera').src = `http://${$('host').value || 'localhost'}:8080/stream?topic=${encodeURIComponent(topic)}`;
+  $('camera').src = `http://${$('host').value || 'localhost'}:8080/stream?topic=${topic}`;
 });

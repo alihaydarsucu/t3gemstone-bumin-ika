@@ -124,6 +124,19 @@ section h2 {
 
 .controls { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
 .controls input[type=range] { width: 100%; }
+.controls #kb-toggle {
+  background: #1a1a1a;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.controls #kb-toggle.active { background: var(--ok); color: #111; }
+#kb-state { font-size: 12px; padding: 3px 8px; border-radius: 4px; }
+#kb-state.on { background: var(--ok); color: #111; }
+#kb-state.off { background: #555; color: #ddd; }
 .controls #stop {
   background: var(--warn);
   color: #111;
