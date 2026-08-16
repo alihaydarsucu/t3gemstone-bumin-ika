@@ -1,13 +1,24 @@
-"""gcs_bringup: tarayicida calisan GCS (Ground Control Station) launch'i.
+"""gcs_bringup: tarayicida calisan GCS (Ground Control Station) web launch'i.
 
-auto_mapping (Gazebo + Nav2 + frontier explorer) uzerine 3 web bileşenini
-ekler:
+Robot tarafindan (gemstone_sim / auto_mapping) bagimsiz olarak 3 web
+bilesenini ayaga kaldirir:
 
   1. rosbridge_websocket  -> ws://localhost:9090  (ROS topic/servis, roslib.js)
   2. web_video_server     -> http://localhost:8080/stream?topic=/camera/image_raw
-  3. http.server (statik) -> http://localhost:8000  (gcs/ web arayüzü)
+  3. http.server (statik) -> http://localhost:8000  (gcs/ web arayuzu)
 
-Kullanim (sim):
+Bu launch robot tarafini icermez: gercek hayatta GCS ayri bir bilgisayarda
+calisir ve robotla ROS graph uzerinden (ROS_DOMAIN_ID / DDS) haberlesir.
+Robot tarafini ayri baslatmak icin:
+
+  ros2 launch gemstone_frontier_explorer auto_mapping.launch.py \
+      enable_rviz:=true world_file:=<path>  # sim'de robot tarafi
+
+Kullanim (sim, ayri terminal):
+  # Terminal 1 - robot tarafi (sim + Nav2 + kesif + RViz):
+  ros2 launch gemstone_frontier_explorer auto_mapping.launch.py
+
+  # Terminal 2 - GCS web tarafi:
   ros2 launch gemstone_gcs gcs_bringup.launch.py
   # tarayicida http://localhost:8000 ac, 'Baglan' de.
 
@@ -17,21 +28,10 @@ calisir; image_proc senkronize GOP yapilandirmasi kullanilmaz (raw JPEG).
 
 import os
 
-from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import (
-    DeclareLaunchArgument,
-    ExecuteProcess,
-    IncludeLaunchDescription,
-)
-from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.actions import DeclareLaunchArgument, ExecuteProcess
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-
-
-def _launch_path(pkg, file_name):
-    return os.path.join(
-        get_package_share_directory(pkg), 'launch', file_name)
 
 
 def generate_launch_description():
@@ -41,7 +41,6 @@ def generate_launch_description():
     rosbridge_port = LaunchConfiguration('rosbridge_port', default='9090')
     video_port = LaunchConfiguration('video_port', default='8080')
     web_port = LaunchConfiguration('web_port', default='8000')
-    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
 
     declare_web_root = DeclareLaunchArgument(
         'web_root',
@@ -53,17 +52,6 @@ def generate_launch_description():
         'video_port', default_value='8080')
     declare_web_port = DeclareLaunchArgument(
         'web_port', default_value='8000')
-    declare_use_sim_time = DeclareLaunchArgument(
-        'use_sim_time', default_value='true')
-
-    auto_mapping = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            _launch_path('gemstone_frontier_explorer', 'auto_mapping.launch.py')),
-        launch_arguments={
-            'use_sim_time': use_sim_time,
-            'enable_rviz': 'false',   # GCS zaten web tarafinda görüntü
-        }.items(),
-    )
 
     rosbridge_websocket = Node(
         package='rosbridge_server',
@@ -115,8 +103,6 @@ def generate_launch_description():
         declare_rosbridge_port,
         declare_video_port,
         declare_web_port,
-        declare_use_sim_time,
-        auto_mapping,
         rosbridge_websocket,
         rosapi,
         web_video_server,
