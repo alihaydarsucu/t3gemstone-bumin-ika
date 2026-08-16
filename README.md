@@ -88,6 +88,21 @@ ros2 launch gemstone_frontier_explorer auto_mapping.launch.py \
 Ayrıntılı akış (keşfe başlatma, izleme, harita kaydetme, video kaydı) için
 [docs/tr/ev-haritalama.md](docs/tr/ev-haritalama.md) bölümüne bakın.
 
+## GCS (Tarayıcıda Yer Kontrol İstasyonu)
+
+Simülasyonu Gazebo + RViz yerine tarayıcıdan izleyip yönetmek için
+`gemstone_gcs` paketi rosbridge + web_video_server + statik web arayüzünü
+(`gcs/`) tek launch'ta başlatır: harita, kamera akışı, teleop ve keşif
+kontrolü `http://localhost:8000` üzerinden çalışır.
+
+```bash
+colcon build --symlink-install --packages-select gemstone_gcs
+ros2 launch gemstone_gcs gcs_bringup.launch.py
+# tarayıcıda http://localhost:8000 aç, Bağlan'a bas
+```
+
+Ayrıntılar için [docs/tr/gcs.md](docs/tr/gcs.md) bölümüne bakın.
+
 <video controls width="100%">
   <source src="https://raw.githubusercontent.com/alitalhq/t3gemstone-bumin-ika-docs/main/docs/assets/sim/sim-office-exploration.mp4" type="video/mp4">
   Tarayıcınız video etiketini desteklemiyor.
@@ -106,6 +121,7 @@ Ayrıntılı akış (keşfe başlatma, izleme, harita kaydetme, video kaydı) i�
 | Bringup | Tek launch ile çalışıyor |
 | Simülasyon | Gazebo ofis dünyası + gemstone node'ları |
 | Otonom haritalama | Ev dünyası + frontier keşfi (`auto_mapping`) |
+| GCS | Tarayıcıdan harita + kamera + teleop + keşif (`gcs_bringup`) |
 | Dokümantasyon | Ayrıntılı içerik docs reposunda |
 | Dil desteği | TR / EN girişleri mevcut |
 
