@@ -18,6 +18,15 @@
   <exec_depend>rf2o_laser_odometry</exec_depend>
   <exec_depend>slam_toolbox</exec_depend>
   <exec_depend>nav2_bringup</exec_depend>
+  <!-- nav2_launch.py dogrudan baslattigi icin tek tek de bildirilir
+       (nav2_bringup'in gecisli bagimliligina guvenilmez). -->
+  <exec_depend>nav2_controller</exec_depend>
+  <exec_depend>nav2_smoother</exec_depend>
+  <exec_depend>nav2_planner</exec_depend>
+  <exec_depend>nav2_behaviors</exec_depend>
+  <exec_depend>nav2_bt_navigator</exec_depend>
+  <exec_depend>nav2_waypoint_follower</exec_depend>
+  <exec_depend>nav2_lifecycle_manager</exec_depend>
   <exec_depend>gemstone_obstacle_avoidance</exec_depend>
   <exec_depend>gemstone_exploration_demo</exec_depend>
 

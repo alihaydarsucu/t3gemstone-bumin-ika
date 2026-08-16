@@ -13,3 +13,10 @@ src/rf2o_laser_odometry/
 src/sllidar_ros2/
 .drift/
 .vscode/
+# slam_toolbox /frontier_explorer tarafindan uretilen harita ciktilari
+/map_son_*.pgm
+/map_son_*.yaml
+/*_map.pgm
+/*_map.yaml
+/media/*.webm
+/media/*.mp4

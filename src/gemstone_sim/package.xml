@@ -21,6 +21,9 @@
   <exec_depend>gemstone_exploration_demo</exec_depend>
   <exec_depend>gemstone_obstacle_avoidance</exec_depend>
   <exec_depend>gemstone_image_proc</exec_depend>
+  <!-- rviz default config'i gemstone_frontier_explorer paketinden gelir
+       (sim_bringup.launch.py rviz_config_file default'u). -->
+  <exec_depend>gemstone_frontier_explorer</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
