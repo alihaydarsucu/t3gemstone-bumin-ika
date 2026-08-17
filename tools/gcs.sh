@@ -10,9 +10,10 @@
 # the ROS graph (ROS_DOMAIN_ID / DDS). These two modes mirror that split.
 #
 # Usage (from repo root):
-#   ./tools/gcs.sh robot                 # robot side: sim + Nav2 + exploration + RViz (office.world)
-#   ./tools/gcs.sh robot house           # robot side with house.world
+#   ./tools/gcs.sh robot                 # robot side: sim + Nav2 + exploration + RViz (house.world)
+#   ./tools/gcs.sh robot office          # robot side with office.world
 #   ./tools/gcs.sh robot enable_rviz:=false
+#   ./tools/gcs.sh robot enable_gui:=true   # gzclient açmak için (xhost +local: gerekli)
 #   ./tools/gcs.sh web                   # GCS web side: rosbridge + web_video + web UI
 #   ./tools/gcs.sh both                  # robot + web in two detached execs (default)
 #
@@ -22,6 +23,11 @@ set -euo pipefail
 
 CONTAINER="${GEMSTONE_CONTAINER:-gemstone_sim}"
 WEB_PORT="${GCS_WEB_PORT:-8000}"
+
+# Ensure X11 access for RViz / gzclient inside the container.
+if command -v xhost >/dev/null 2>&1; then
+    xhost +local: 2>/dev/null || true
+fi
 
 # Start container if not running yet.
 if ! docker ps --format '{{.Names}}' | grep -qx "$CONTAINER"; then
@@ -33,11 +39,7 @@ LAUNCH_CMD="source /opt/ros/humble/setup.bash && source /ros_ws/install/setup.ba
 
 robot_cmd() {
     local extra=""
-    local world="office.world"
-    if [ "${1:-}" = "house" ]; then
-        world="house.world"
-        shift
-    fi
+    local world="house.world"
     if [ "${1:-}" = "office" ]; then
         world="office.world"
         shift
@@ -45,7 +47,7 @@ robot_cmd() {
     extra="$*"
     echo "$LAUNCH_CMD ros2 launch gemstone_frontier_explorer auto_mapping.launch.py \
         world_file:=/ros_ws/install/gemstone_sim/share/gemstone_sim/worlds/$world \
-        enable_rviz:=true $extra"
+        enable_rviz:=true enable_gui:=true $extra"
 }
 
 web_cmd() {

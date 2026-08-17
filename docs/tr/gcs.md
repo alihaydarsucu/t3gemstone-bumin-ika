@@ -1,4 +1,4 @@
-# Gemstone GCS — Tarayıcıda Yer Kontrol İstasyonu
+# Bumin GCS — Tarayıcıda Yer Kontrol İstasyonu
 
 Bu doküman, simülasyonu **tarayıcıdan** izleyip yönetmenizi sağlayan GCS
 (Ground Control Station) arayüzünü anlatır. Gazebo + RViz açmak yerine
@@ -63,10 +63,10 @@ Tarayıcıda **http://localhost:8000** açın, host/port doğruysa (varsayılan
 
 | Panel | Kaynak | Açıklama |
 |-------|--------|----------|
-| Harita | `/map` + `/odom` | OccupancyGrid çizilir; robot mavi ok, frontier'ler yeşil nokta, hedef turuncu ok. |
-| Kamera | `/camera/image_raw` (MJPEG) | Topic alanı değiştirilebilir, "Akışı Aç" yeniler. |
-| Teleop | `/cmd_vel_nav` | Önce **Klavye Kontrolünü Aç** butonuna basın, sonra ok tuşları / WASD ile sürün (boşluk durdur). Hız/dönüş sürgülerle ayarlanır. `/cmd_vel_nav`'e yazar → obstacle_avoidance güvenlik katmanından geçer. |
-| Keşif | `/exploration/*` servisleri | "Kesife Basla" / "Durdur" / "Harita Kaydet". |
+| Harita | `/map` + `/odom` | OccupancyGrid çizilir; robot mavi ok, frontier'ler yeşil nokta, hedef turuncu ok. RViz ile aynı orientasyon. |
+| Kamera | `/camera/image_raw` (MJPEG) | Bağlanınca otomatik başlar. Topic alanı değiştirilebilir, "Akışı Aç" yeniler. |
+| Teleop | `/cmd_vel_nav` | Ok tuşları / WASD ile sürün (boşluk durdur). Hız/güncel hız göstergesi canlıdır. `/cmd_vel_nav`'e yazar → obstacle_avoidance güvenlik katmanından geçer. Hız limitleri: 0.30 m/s, 0.8 rad/s. |
+| Keşif | `/exploration/*` servisleri | "Kesifi Baslat" / "Durdur" / "Harita Kaydet". |
 
 Durum satırı `/exploration/status` (RUNNING/DONE/IDLE) ve
 `/exploration/coverage` (keşfedilen oran %) gösterir.
@@ -101,6 +101,8 @@ ros2 service call /exploration/start std_srvs/srv/Trigger "{}"
 - **Port çakışması**: portlar launch arg'larıyla değiştirilebilir:
   `rosbridge_port:=9090 video_port:=8080 web_port:=8000`.
 - **RViz istemiyorum**: robot tarafını `enable_rviz:=false` ile başlatın.
+- **Gazebo penceresi (gzclient) açılmıyor**: `gcs.sh` varsayılan olarak `enable_gui:=false` kullanır (GCS web'den izlenir). gzclient isterseniz: `./tools/gcs.sh robot enable_gui:=true` ve öncesinde `xhost +local:` çalıştırın.
+- **X hatası / Authorization**: `xhost +local:` ile düzeltilir; `gcs.sh` otomatik çalıştırır.
 
 ## 6. Dosyalar
 

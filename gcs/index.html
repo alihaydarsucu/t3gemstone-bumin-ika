@@ -3,18 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Gemstone GCS</title>
-  <link rel="stylesheet" href="gcs.css">
+  <title>Bumin GCS</title>
+  <link rel="icon" type="image/png" href="https://cdnv2.t3vakfi.org/static/assets/img/favico.png">
+  <link rel="stylesheet" href="gcs.css?v=6">
 </head>
 <body>
   <header>
-    <h1>Gemstone GCS</h1>
-    <div id="conn">
-      <label>Rosbridge</label>
-      <input id="host" value="localhost" title="rosbridge host">
-      <input id="port" value="9090" title="rosbridge port">
-      <button id="connect">Bağlan</button>
-      <span id="conn-state" class="off">Kapalı</span>
+    <div class="header-left">
+      <img src="https://raw.githubusercontent.com/t3gemstone/docs/main/logo/dark.png" alt="Gemstone" class="logo" onerror="this.style.display='none'">
+      <h1>Bumin GCS</h1>
+      <span id="mode-badge" class="mode-badge mode-duruyor">DURUYOR</span>
+    </div>
+    <div class="header-center">
+      <div class="conn-row">
+        <label>Rosbridge</label>
+        <input id="host" value="localhost" title="rosbridge host">
+        <input id="port" value="9090" title="rosbridge port">
+        <button id="connect" class="btn-blue">Bağlan</button>
+        <span id="conn-state" class="off">Kapalı</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <button id="estop" class="btn-estop">ACİL DURDUR</button>
+      <button id="resume" class="btn-resume hidden">DEVAM ET</button>
     </div>
   </header>
 
@@ -26,45 +37,49 @@
         <span class="sw free"></span> Boş
         <span class="sw wall"></span> Duvar
         <span class="sw unk"></span> Bilinmeyen
+        <span class="sw frontier"></span> Frontier
       </div>
     </section>
 
     <section id="right-col">
       <section id="cam-panel">
         <h2>Kamera</h2>
-        <img id="camera" alt="kamera akışı" title="web_video_server MJPEG">
+        <img id="camera" alt="Akış yükleniyor..." title="web_video_server MJPEG">
         <div class="cam-url">
           <input id="cam-topic" value="/camera/image_raw">
-          <button id="cam-apply">Akışı Aç</button>
+          <button id="cam-apply" class="btn-blue">Akışı Aç</button>
         </div>
+        <div id="cam-status" class="cam-status off">Kapalı</div>
       </section>
 
       <section id="teleop-panel">
         <h2>Teleop</h2>
         <div class="grid">
-          <button data-dx="0"   data-dy="1"   class="k">▲</button>
-          <button data-dx="-1"  data-dy="0"  class="k">◀</button>
-          <button data-dx="0"   data-dy="-1" class="k">▼</button>
-          <button data-dx="1"   data-dy="0"  class="k">▶</button>
+          <button id="btn-up"    data-dx="0"   data-dy="1"   class="k">&#9650;</button>
+          <button id="btn-left"  data-dx="1"   data-dy="0"  class="k">&#9664;</button>
+          <button id="btn-down"  data-dx="0"   data-dy="-1" class="k">&#9660;</button>
+          <button id="btn-right" data-dx="-1"  data-dy="0"  class="k">&#9654;</button>
+        </div>
+        <div id="speed-display" class="speed-indicator">
+          <span class="val">0.00 m/s</span> &middot; <span class="val">0.00 rad/s</span>
         </div>
         <div class="controls">
-          <label>Hız (m/s): <input id="vel-x" type="range" min="0.05" max="0.22" step="0.01" value="0.10"></label>
-          <label>Dönüş (rad/s): <input id="vel-th" type="range" min="0.1" max="0.6" step="0.05" value="0.30"></label>
-          <button id="kb-toggle">Klavye Kontrolünü Aç</button>
-          <span id="kb-state" class="off">Klavye kapalı</span>
-          <button id="stop">DUR</button>
+          <label>Hız (m/s): <input id="vel-x" type="range" min="0.05" max="0.30" step="0.01" value="0.15"></label>
+          <label>Dönüş (rad/s): <input id="vel-th" type="range" min="0.1" max="0.8" step="0.05" value="0.40"></label>
         </div>
-        <p class="hint">Klavye: önce <b>Klavye Kontrolünü Aç</b>'a tıkla, sonra ok tuşları /
-          WASD ile sür (boşluk = dur). Teleop <b>/cmd_vel_nav</b>'e yazar
-          (güvenlik katmanından geçer).</p>
+        <div class="kb-row">
+          <button id="kb-toggle" class="btn-blue">Klavye Aç</button>
+          <span id="kb-state" class="off">Klavye kapalı</span>
+        </div>
+        <p class="hint">Ok tuşları / WASD ile sür, boşluk = dur.</p>
       </section>
 
       <section id="explore-panel">
         <h2>Keşif</h2>
         <div class="explore-btns">
-          <button id="start" class="go">Kesife Basla</button>
-          <button id="stopx" class="warn">Durdur</button>
-          <button id="save">Harita Kaydet</button>
+          <button id="start" class="btn-go">Keşife Başla</button>
+          <button id="stopx" class="btn-warn">Keşifi Durdur</button>
+          <button id="save" class="btn-accent">Harita Kaydet</button>
         </div>
         <div class="status">
           <span class="lbl">Durum:</span> <span id="status-val">—</span>
@@ -74,11 +89,14 @@
     </section>
   </main>
 
-  <footer>
-    <span id="log"></span>
-  </footer>
+  <section id="console-panel">
+    <h2>Konsol</h2>
+    <div id="console-log"></div>
+  </section>
+
+  <div id="toast" class="toast hidden"></div>
 
   <script src="vendor/roslib.js"></script>
-  <script src="gcs.js"></script>
+  <script src="gcs.js?v=6"></script>
 </body>
 </html>

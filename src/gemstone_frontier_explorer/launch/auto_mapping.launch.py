@@ -48,22 +48,25 @@ def generate_launch_description():
 
     use_sim_time = LaunchConfiguration('use_sim_time')
     enable_rviz = LaunchConfiguration('enable_rviz')
+    enable_gui = LaunchConfiguration('enable_gui')
     world_file = LaunchConfiguration(
         'world_file',
         default=os.path.join(
             get_package_share_directory('gemstone_sim'),
-            'worlds', 'office.world'))
+            'worlds', 'house.world'))
 
     declare_use_sim_time = DeclareLaunchArgument(
         'use_sim_time', default_value='true')
     declare_enable_rviz = DeclareLaunchArgument(
         'enable_rviz', default_value='true')
+    declare_enable_gui = DeclareLaunchArgument(
+        'enable_gui', default_value='true')
     declare_world_file = DeclareLaunchArgument(
         'world_file',
         default_value=os.path.join(
             get_package_share_directory('gemstone_sim'),
-            'worlds', 'office.world'),
-        description='Gazebo dünya dosyasi (mutlak yol). Varsayilan: office.world.')
+            'worlds', 'house.world'),
+        description='Gazebo dünya dosyasi (mutlak yol). Varsayilan: house.world.')
     declare_x_pose = DeclareLaunchArgument('x_pose', default_value='-3.0')
     declare_y_pose = DeclareLaunchArgument('y_pose', default_value='2.0')
     declare_z_pose = DeclareLaunchArgument('z_pose', default_value='0.075')
@@ -75,6 +78,7 @@ def generate_launch_description():
             'use_sim_time': use_sim_time,
             'enable_exploration_demo': 'false',
             'enable_rviz': enable_rviz,
+            'enable_gui': enable_gui,
             'world_file': world_file,
             'x_pose': LaunchConfiguration('x_pose'),
             'y_pose': LaunchConfiguration('y_pose'),
@@ -113,6 +117,7 @@ def generate_launch_description():
     return LaunchDescription([
         declare_use_sim_time,
         declare_enable_rviz,
+        declare_enable_gui,
         declare_world_file,
         declare_x_pose,
         declare_y_pose,

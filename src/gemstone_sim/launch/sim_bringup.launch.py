@@ -143,7 +143,7 @@ def generate_launch_description():
             'use_sim_time': LaunchConfiguration('use_sim_time'),
             # Kapali/dar ortam (ev) icin cok konservatif olmasin: ofis icin 0.4,
             # ev kapilari (~0.9 m) icin 0.25 m guvenlik yeterli.
-            'safety_distance': 0.25,
+            'safety_distance': 0.30,
         }],
     )
 

@@ -18,10 +18,8 @@
 #   use_sim_time:=true odom_topic:=/odom
 # Buradaki use_sim_time degeri launch tarafindan ezilir.
 #
-# Hiz limitleri motor surucusuyle uyumludur:
-#   max_linear_speed 0.22 m/s, max_angular_speed 0.6 rad/s
-# (dar/hafif robot mobilya bacaklarina carptiginda ters dönmesin diye
-# ofis degerlerinden dusuruldu; bkz. docs/tr/ev-haritalama.md).
+# Hiz limitleri artirildi: sim ortaminda daha stabil ve hizli hareket icin.
+# max_linear 0.30 m/s, max_angular 0.8 rad/s, yumusak ivme sinirlari.
 
 controller_server:
   ros__parameters:
@@ -49,34 +47,30 @@ controller_server:
       debug_trajectory_details: True
       min_vel_x: 0.0
       min_vel_y: 0.0
-      max_vel_x: 0.22
+      max_vel_x: 0.30
       max_vel_y: 0.0
-      max_vel_theta: 0.6
+      max_vel_theta: 0.8
       min_speed_xy: 0.0
-      max_speed_xy: 0.22
+      max_speed_xy: 0.30
       min_speed_theta: 0.0
-      # TB3 turtlebot3_simulations#75 issue'i icin yuksek limitler
-      # (https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/75)
-      acc_lim_x: 1.2
+      acc_lim_x: 1.5
       acc_lim_y: 0.0
-      acc_lim_theta: 1.5
-      decel_lim_x: -1.2
+      acc_lim_theta: 2.0
+      decel_lim_x: -2.0
       decel_lim_y: 0.0
-      decel_lim_theta: -1.5
-      # DWB, footprint'i local_costmap'ten (robot_radius 0.18) alir.
-      # ornekleme parametreleri
-      sim_time: 1.7
-      vx_samples: 20
+      decel_lim_theta: -2.5
+      sim_time: 2.0
+      vx_samples: 25
       vy_samples: 5
-      vtheta_samples: 20
+      vtheta_samples: 25
       sim_granularity: 0.025
       linear_granularity: 0.05
       angular_granularity: 0.025
-      pdist_scale: 0.6
-      gdist_scale: 0.8
-      occdist_scale: 0.1
+      pdist_scale: 0.5
+      gdist_scale: 0.9
+      occdist_scale: 0.08
       angular_scale: 0.0
-      xy_goal_tolerance: 0.25
+      xy_goal_tolerance: 0.20
       trans_stopped_velocity: 0.25
       transform_tolerance: 0.2
       short_circuit_trajectory_evaluation: True
@@ -84,21 +78,21 @@ controller_server:
       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
       BaseObstacle.scale: 0.02
       PathAlign.scale: 32.0
-      PathAlign.forward_point_distance: 0.1
+      PathAlign.forward_point_distance: 0.32
       GoalAlign.scale: 24.0
-      GoalAlign.forward_point_distance: 0.1
+      GoalAlign.forward_point_distance: 0.32
       PathDist.scale: 32.0
       GoalDist.scale: 24.0
       RotateToGoal.scale: 32.0
-      RotateToGoal.slowing_factor: 5.0
+      RotateToGoal.slowing_factor: 4.0
       RotateToGoal.lookahead_time: -1.0
 
 local_costmap:
   local_costmap:
     ros__parameters:
       use_sim_time: False
-      update_frequency: 5.0
-      publish_frequency: 2.0
+      update_frequency: 10.0
+      publish_frequency: 5.0
       global_frame: odom
       robot_base_frame: base_link
       rolling_window: true
@@ -109,8 +103,8 @@ local_costmap:
       plugins: ["obstacle_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 3.0
-        inflation_radius: 0.35
+        cost_scaling_factor: 4.0
+        inflation_radius: 0.40
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
