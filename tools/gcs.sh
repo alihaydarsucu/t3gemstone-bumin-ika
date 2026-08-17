@@ -47,7 +47,7 @@ robot_cmd() {
     extra="$*"
     echo "$LAUNCH_CMD ros2 launch gemstone_frontier_explorer auto_mapping.launch.py \
         world_file:=/ros_ws/install/gemstone_sim/share/gemstone_sim/worlds/$world \
-        enable_rviz:=true enable_gui:=true $extra"
+        enable_rviz:=true enable_gui:=true real_time_factor:=5.0 $extra"
 }
 
 web_cmd() {

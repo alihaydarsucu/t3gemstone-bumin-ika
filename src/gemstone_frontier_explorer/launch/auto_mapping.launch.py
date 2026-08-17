@@ -61,6 +61,9 @@ def generate_launch_description():
         'enable_rviz', default_value='true')
     declare_enable_gui = DeclareLaunchArgument(
         'enable_gui', default_value='true')
+    declare_real_time_factor = DeclareLaunchArgument(
+        'real_time_factor', default_value='1.0',
+        description='Gazebo gercek zaman carpani.')
     declare_world_file = DeclareLaunchArgument(
         'world_file',
         default_value=os.path.join(
@@ -80,6 +83,7 @@ def generate_launch_description():
             'enable_rviz': enable_rviz,
             'enable_gui': enable_gui,
             'world_file': world_file,
+            'real_time_factor': LaunchConfiguration('real_time_factor'),
             'x_pose': LaunchConfiguration('x_pose'),
             'y_pose': LaunchConfiguration('y_pose'),
             'z_pose': LaunchConfiguration('z_pose'),
@@ -118,6 +122,7 @@ def generate_launch_description():
         declare_use_sim_time,
         declare_enable_rviz,
         declare_enable_gui,
+        declare_real_time_factor,
         declare_world_file,
         declare_x_pose,
         declare_y_pose,

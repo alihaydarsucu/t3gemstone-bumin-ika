@@ -48,6 +48,9 @@ def generate_launch_description():
     # --- Argumanlar ---
     use_sim_time = DeclareLaunchArgument('use_sim_time', default_value='true')
     enable_gui = DeclareLaunchArgument('enable_gui', default_value='true')
+    real_time_factor = DeclareLaunchArgument(
+        'real_time_factor', default_value='1.0',
+        description='Gercek zaman carpani (1.0=gercek zaman, 5.0=5x hizli).')
     enable_rviz = DeclareLaunchArgument('enable_rviz', default_value='false')
     enable_exploration_demo = DeclareLaunchArgument(
         'enable_exploration_demo', default_value='true',
@@ -88,6 +91,14 @@ def generate_launch_description():
 
     # gzserver'in dünyayı yüklemesine zaman tanıyıp sonra gzclient'i aç.
     start_gzclient = TimerAction(period=5.0, actions=[gzclient])
+
+    # Gercek zaman faktorunu ayarla (service Gazebo basladiktan sonra hazir olur).
+    set_real_time_factor = TimerAction(period=8.0, actions=[ExecuteProcess(
+        cmd=['ros2', 'service', 'call', '/gazebo/set_parameters',
+             'gazebo_msgs/srv/SetParameters',
+             '{parameters: [{name: "real_time_factor", value: {type: 2, double_value: 1.0}}]}'],
+        output='screen',
+    )])
 
     # --- Robot ---
     robot_state_publisher = Node(
@@ -141,9 +152,10 @@ def generate_launch_description():
         output='screen',
         parameters=[{
             'use_sim_time': LaunchConfiguration('use_sim_time'),
-            # Kapali/dar ortam (ev) icin cok konservatif olmasin: ofis icin 0.4,
-            # ev kapilari (~0.9 m) icin 0.25 m guvenlik yeterli.
-            'safety_distance': 0.30,
+            # Kapali/dar ortam (ev) icin: 0.25 m guvenlik, dar koridor/
+            # kapilardan geciste takilmamak icin forward_half_angle 20'ye dusuruldu.
+            'safety_distance': 0.25,
+            'forward_half_angle_deg': 20.0,
         }],
     )
 
@@ -170,6 +182,7 @@ def generate_launch_description():
         enable_gui,
         enable_rviz,
         enable_exploration_demo,
+        real_time_factor,
         x_pose,
         y_pose,
         z_pose,
@@ -178,6 +191,7 @@ def generate_launch_description():
         rviz_config_file_arg,
         gzserver,
         start_gzclient,
+        set_real_time_factor,
         robot_state_publisher,
         spawn_entity,
         motion_state_node,
