@@ -10,7 +10,6 @@
 
 <p align="center">
   <a href="https://t3gemstone.org"><img alt="T3 Foundation" src="https://raw.githubusercontent.com/t3gemstone/docs/main/images/t3-foundation.svg"></a>
-  <a href="https://opensource.org/licenses/Apache-2.0"><img alt="License" src="https://img.shields.io/badge/License-Apache_2.0-blue.svg"></a>
   <a href="https://github.com/alitalhq/t3gemstone-bumin-ika-docs"><img alt="Docs repo" src="https://img.shields.io/badge/Docs-repo-red.svg"></a>
   <a href="https://github.com/alitalhq/t3gemstone-bumin-ika-docs/tree/main/docs/tr/01-kart-kurulumu.md"><img alt="TR docs" src="https://img.shields.io/badge/Docs-TR-red.svg"></a>
   <a href="https://github.com/alitalhq/t3gemstone-bumin-ika-docs/tree/main/docs/en/01-board-setup.md"><img alt="EN docs" src="https://img.shields.io/badge/Docs-EN-blue.svg"></a>
@@ -21,10 +20,20 @@
 > **[EN]** A differential-drive UGV project running on the T3 Gemstone O1, bringing sensors and motor workflows together in a single ROS 2 bringup flow.
 
 <p align="center">
+  <img src="assets/gazebo-sim-screenshot.png" alt="Gazebo simulation" width="49%" />
+  <img src="assets/gcs-screenshot.png" alt="GCS web interface" width="49%" />
+</p>
+
+<details>
+<summary>Robot photos</summary>
+
+<p align="center">
   <img src="assets/ugv-bare-chassis.jpeg" alt="Bare chassis" width="31%" />
   <img src="assets/ugv-wiring-rear.jpeg" alt="Wiring rear view" width="31%" />
   <img src="assets/ugv-assembled-front.jpeg" alt="Assembled front view" width="31%" />
 </p>
+
+</details>
 
 ## Kısa Tanım
 
