@@ -30,8 +30,13 @@ def generate_launch_description():
     exploration_demo_share = get_package_share_directory('gemstone_exploration_demo')
     naive_avoidance_params_file = os.path.join(
         exploration_demo_share, 'params', 'naive_avoidance_params.yaml')
+    lidar_motor_pwm_params_file = os.path.join(
+        pkg_share, 'params', 'lidar_motor_pwm_params.yaml')
 
     enable_rplidar = DeclareLaunchArgument('enable_rplidar', default_value='true')
+    # Lidarin kendi taban kartindaki motor surucusunu (CTRL_MOTO) besleyen
+    # sabit PWM -- bkz. lidar_motor_pwm_params.yaml.
+    enable_lidar_motor_pwm = DeclareLaunchArgument('enable_lidar_motor_pwm', default_value='true')
     enable_rf2o = DeclareLaunchArgument('enable_rf2o', default_value='true')
     enable_obstacle_avoidance = DeclareLaunchArgument('enable_obstacle_avoidance', default_value='true')
     # Projenin asil otonom hareket davranisi gemstone_exploration_demo'daki
@@ -122,6 +127,15 @@ def generate_launch_description():
         parameters=[naive_avoidance_params_file],
     )
 
+    lidar_motor_pwm_node = Node(
+        package='gemstone_motor_driver',
+        executable='lidar_motor_pwm_node',
+        name='lidar_motor_pwm_node',
+        output='screen',
+        condition=IfCondition(LaunchConfiguration('enable_lidar_motor_pwm')),
+        parameters=[lidar_motor_pwm_params_file],
+    )
+
     slam_toolbox_launch = GroupAction(
         condition=IfCondition(LaunchConfiguration('enable_slam_toolbox')),
         actions=[
@@ -162,6 +176,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         enable_rplidar,
+        enable_lidar_motor_pwm,
         enable_rf2o,
         enable_obstacle_avoidance,
         enable_naive_avoidance,
@@ -174,6 +189,7 @@ def generate_launch_description():
         nav2_cmd_vel_topic,
         nav2_odom_topic,
         rplidar_launch,
+        lidar_motor_pwm_node,
         rf2o_node,
         obstacle_avoidance_node,
         naive_avoidance_node,

@@ -29,6 +29,7 @@
   <exec_depend>nav2_lifecycle_manager</exec_depend>
   <exec_depend>gemstone_obstacle_avoidance</exec_depend>
   <exec_depend>gemstone_exploration_demo</exec_depend>
+  <exec_depend>gemstone_motor_driver</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

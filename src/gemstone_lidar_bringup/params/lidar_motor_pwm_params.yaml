@@ -1,0 +1,19 @@
+lidar_motor_pwm_node:
+  ros__parameters:
+    # RPLIDAR A1M8'in orijinal USB adaptor karti sokulup yerine dogrudan
+    # Gemstone baglandi (bkz. docs/09-bilinen-sorunlar-ve-cozumler.md).
+    # Lidarin kendi taban kartindaki 3-pinli konnektor (GND_MOTO, CTRL_MOTO,
+    # 5V_MOTO) uzerinden motor sürücüsü (Q14) besleniyor:
+    #   5V_MOTO  -> Gemstone 5V (header)
+    #   GND_MOTO -> Gemstone GND (header)
+    #   CTRL_MOTO -> Gemstone GPIO5, fiziksel pin 29 (epwm0 overlay,
+    #                /boot/uEnv.txt: ...-pwm-epwm0-gpio5.dtbo) -> pwmchip3/pwm0
+    pwm_chip: 3
+    pwm_channel: 0
+    period_ns: 1000000   # 1kHz
+
+    # Sahada test edildi: %100 duty'de motor akiminin urettigi elektriksel
+    # gurultu TX/RX haberlesmesini bozup "operation timeout" hatasina yol
+    # aciyor. %85, gercek/orijinal calisma hizina yakin ve /scan ~6 Hz ile
+    # stabil akiyor -- 100'e yaklastirmayin.
+    duty_percent: 85.0
