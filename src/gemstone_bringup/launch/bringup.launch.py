@@ -57,6 +57,10 @@ def generate_launch_description():
     # gemstone_lidar_bringup'a gecirilecek alt argumanlar (varsayilanlari orada)
     enable_slam_toolbox = DeclareLaunchArgument('enable_slam_toolbox', default_value='false')
     enable_nav2 = DeclareLaunchArgument('enable_nav2', default_value='false')
+    # Varsayilan USB-TTL adaptor (/dev/ttyUSB0); lidar dogrudan Gemstone'un
+    # donanimsal UART pinlerine (GPIO14/15, uart-ttys0 overlay) baglandiysa
+    # /dev/ttyS0 verin.
+    lidar_serial_port = DeclareLaunchArgument('lidar_serial_port', default_value='/dev/ttyUSB0')
 
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
@@ -157,6 +161,7 @@ def generate_launch_description():
         launch_arguments={
             'enable_slam_toolbox': LaunchConfiguration('enable_slam_toolbox'),
             'enable_nav2': LaunchConfiguration('enable_nav2'),
+            'lidar_serial_port': LaunchConfiguration('lidar_serial_port'),
         }.items(),
     )
 
@@ -182,6 +187,7 @@ def generate_launch_description():
         enable_rviz,
         enable_slam_toolbox,
         enable_nav2,
+        lidar_serial_port,
         robot_state_publisher_node,
         joint_state_publisher_node,
         imu_node,
